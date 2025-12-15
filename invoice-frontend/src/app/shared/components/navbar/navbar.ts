@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -8,5 +8,7 @@ import { RouterModule } from '@angular/router';
   styleUrl: './navbar.css',
 })
 export class Navbar {
+
+  @Output() toggleSidebar = new EventEmitter<void>();
 
 }

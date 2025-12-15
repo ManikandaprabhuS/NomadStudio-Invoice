@@ -1,30 +1,19 @@
 <header class="header">
-    <!-- Logo + Studio Name -->
-    <a routerLink="/dashboard" class="logo">
-        <img src="/assets/logo.png" alt="Nomad Studio" />
-        <span class="studio-name">Nomad Studio</span>
-    </a>
+    <div class="nav-inner">
+        <!-- Hamburger (Mobile only) -->
+        <button class="menu-toggle" type="button" (click)="toggleSidebar.emit()">
+            ☰
+        </button>
 
-    <!-- Mobile menu button -->
-    <input class="menu-btn" type="checkbox" id="menu-btn" />
-    <label class="menu-icon" for="menu-btn">
-        <span class="navicon"></span>
-    </label>
+        <!-- Logo + Studio Name -->
+        <a routerLink="/dashboard" class="logo">
+            <img src="/assets/logo.png" alt="Nomad Studio" />
+            <span class="studio-name">Nomad Studio</span>
+        </a>
 
-    <!-- Menu -->
-    <ul class="menu">
-        <li>
-            <a routerLink="/dashboard" routerLinkActive="active"
-                [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
-        </li>
-        <li>
-            <a routerLink="/clients" routerLinkActive="active">Clients</a>
-        </li>
-        <li>
-            <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
-        </li>
-        <li>
-            <a routerLink="/logout" routerLinkActive="active">Logout</a>
-        </li>
-    </ul>
+        <!-- Logout (Desktop only) -->
+        <a routerLink="/logout" routerLinkActive="active" class="nav-logout desktop-only">
+            Logout
+        </a>
+    </div>
 </header>

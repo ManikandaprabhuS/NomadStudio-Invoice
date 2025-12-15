@@ -1,5 +1,9 @@
-<app-navbar></app-navbar>
+<app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
 
-<div class="layout-content p-4">
-    <router-outlet></router-outlet>
+<div class="layout">
+    <app-sidebar class="sidebar" [class.open]="isSidebarOpen" (close)="closeSidebar()"></app-sidebar>
+
+    <main class="content">
+        <router-outlet></router-outlet>
+    </main>
 </div>

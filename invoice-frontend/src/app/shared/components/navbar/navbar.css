@@ -1,168 +1,79 @@
-/* Header and general */
+/* Header */
 .header {
+    height: 64px;
     background-color: #fff;
     box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
     position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    z-index: 3;
+    z-index: 1000;
 }
 
-.header ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    overflow: hidden;
-    background-color: #fff;
-}
-
-.header li a {
-    display: block;
-    padding: 20px 20px;
-    border-right: 1px solid #f4f4f4;
-    transition: color 0.2s ease, transform 0.2s ease;
-    text-decoration: none;
-    color: #000;
-}
-
-/* Active menu item */
-.header li a.active {
-    color: #A0522D;
-    /* match logo color */
-    font-weight: bold;
-    text-decoration: none;
-}
-
-/* Hover effect for menu items */
-.header li a:hover,
-.header .menu-btn:hover {
-    color: #A0522D;
-    transform: scale(1.05);
-    background-color: #f4f4f4;
-    text-decoration: none;
-}
-
-/* Logo + Studio Name */
-.header .logo {
+.nav-inner {
+    height: 100%;
     display: flex;
     align-items: center;
-    float: left;
-    padding: 8px 20px;
-    text-decoration: none;
-    transition: transform 0.2s ease;
+    padding: 0 24px;
+    box-sizing: border-box;
 }
 
-.header .logo img {
-    height: 50px;
-    width: auto;
-    object-fit: contain;
-    margin-right: 15px;
-    transition: transform 0.2s ease;
-}
-
-.header .logo .studio-name {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #A0522D;
-    transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.header .logo:hover img,
-.header .logo:hover .studio-name {
-    transform: scale(1.05);
-}
-
-/* Mobile Menu Toggle */
-.header .menu {
-    clear: both;
-    max-height: 0;
-    transition: max-height 0.2s ease-out;
-}
-
-.header .menu-icon {
+/* Hamburger toggle */
+.menu-toggle {
+    background: none;
+    border: none;
+    font-size: 24px;
     cursor: pointer;
-    float: right;
-    padding: 28px 20px;
-    position: relative;
-    user-select: none;
-}
-
-.header .menu-icon .navicon {
-    background: #333;
-    display: block;
-    height: 2px;
-    position: relative;
-    transition: background 0.2s ease-out;
-    width: 18px;
-}
-
-.header .menu-icon .navicon:before,
-.header .menu-icon .navicon:after {
-    background: #333;
-    content: '';
-    display: block;
-    height: 100%;
-    position: absolute;
-    transition: all 0.2s ease-out;
-    width: 100%;
-}
-
-.header .menu-icon .navicon:before {
-    top: 5px;
-}
-
-.header .menu-icon .navicon:after {
-    top: -5px;
-}
-
-.header .menu-btn {
+    margin-right: 12px;
     display: none;
 }
 
-.header .menu-btn:checked~.menu {
-    max-height: 240px;
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
 }
 
-.header .menu-btn:checked~.menu-icon .navicon {
-    background: transparent;
+.logo img {
+    height: 40px;
+    margin-right: 12px;
 }
 
-.header .menu-btn:checked~.menu-icon .navicon:before {
-    transform: rotate(-45deg);
-    top: 0;
+.studio-name {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #A0522D;
 }
 
-.header .menu-btn:checked~.menu-icon .navicon:after {
-    transform: rotate(45deg);
-    top: 0;
+/* Logout */
+.nav-logout {
+    margin-left: auto;
+    padding: 10px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.nav-logout:hover,
+.nav-logout.active {
+    color: #d32f2f;
+    background: #fff5f5;
 }
 
 /* Responsive */
-@media (min-width: 48em) {
-    .header li {
-        float: left;
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
     }
 
-    .header li a {
-        padding: 20px 30px;
-    }
-
-    .header .menu {
-        clear: none;
-        float: right;
-        max-height: none;
-    }
-
-    .header .menu-icon {
+    .desktop-only {
         display: none;
     }
-}
 
-@media (max-width: 768px) {
-    .header .logo img {
-        height: 40px;
-    }
-
-    .header .logo .studio-name {
+    .studio-name {
         font-size: 1.2em;
     }
 }
