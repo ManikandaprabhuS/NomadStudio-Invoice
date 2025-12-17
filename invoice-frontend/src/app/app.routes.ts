@@ -11,6 +11,7 @@ import { InvoiceList } from './pages/invoice-list/invoice-list';
 import { CreateClient } from './pages/create-client/create-client';
 import { Clients } from './pages/clients/clients';
 import { Overview } from './pages/overview/overview';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -18,13 +19,13 @@ export const routes: Routes = [
   {
     path: '',  component: MainLayout,
     children: [
-      { path: 'dashboard', component: Dashboard },
+      { path: 'dashboard', component: Dashboard , canActivate: [authGuard] },
       // add more pages here later
-      { path: 'invoices', component: CreateInvoice },
-      { path: 'listinvoices', component: InvoiceList },
-      { path: 'addclient', component: CreateClient },
-      { path: 'clients', component: Clients },
-      {path:'overview', component:Overview}
+      { path: 'invoices', component: CreateInvoice , canActivate: [authGuard] },
+      { path: 'listinvoices', component: InvoiceList , canActivate: [authGuard]   },
+      { path: 'addclient', component: CreateClient , canActivate: [authGuard] },
+      { path: 'clients', component: Clients , canActivate: [authGuard] },
+      {path:'overview', component:Overview, canActivate: [authGuard]}
     ]
   },
 ];
