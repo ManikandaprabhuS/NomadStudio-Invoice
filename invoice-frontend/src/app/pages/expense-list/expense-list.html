@@ -1,33 +1,49 @@
 <div class="expense-container">
+  <div class="expense-card">
 
-  <h2 class="page-title">Expense List</h2>
+    <h2 class="page-title">Expense List</h2>
 
-  <div *ngIf="loading" class="loading">
-    Loading expenses...
+    <div *ngIf="loading" class="loading">
+      Loading expenses...
+    </div>
+
+    <div *ngIf="!loading">
+      <input 
+        type="text" 
+        class="search-input"
+        placeholder="Search by Amount or Reason" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="applyFilter()" 
+      />
+
+      <table class="expense-table" *ngIf="filteredExpenses.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Reason</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let expense of filteredExpenses; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ expense.reason }}</td>
+            <td class="amount">₹ {{ expense.amount }}</td>
+            <td>{{ expense.createdAt | date:'dd MMM yyyy' }}</td>
+            <td>
+              <button class="delete-btn" (click)="deleteExpense(expense._id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="filteredExpenses.length === 0" class="empty">
+        No expenses found
+      </div>
+    </div>
+
   </div>
-
-  <table class="expense-table" *ngIf="!loading && expenses.length > 0">
-    <thead>
-      <tr>
-        <th>Id</th>
-        <th>Reason</th>
-        <th>Amount</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let expense of expenses; let i = index">
-        <td>{{ i + 1 }}</td>
-        <td>{{ expense.reason }}</td>
-        <td class="amount">₹ {{ expense.amount }}</td>
-        <td>{{ expense.createdAt | date:'dd MMM yyyy' }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div *ngIf="!loading && expenses.length === 0" class="empty">
-    No expenses found
-  </div>
-
 </div>

@@ -1,114 +1,156 @@
-/* Page container */
 .expense-container {
-  padding: 24px;
-  background: #f4f6fb;
-  min-height: 100vh;
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Title */
+.expense-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 32px;
+}
+
 .page-title {
-  margin-bottom: 20px;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 600;
-  color: #333;
-}
-
-/* Loading & Empty */
-.loading,
-.empty {
-  padding: 40px;
+  color: #654321;
+  margin-bottom: 24px;
   text-align: center;
-  font-size: 14px;
-  color: #666;
 }
 
-/* Table wrapper */
+.loading {
+  text-align: center;
+  padding: 48px 20px;
+  font-size: 16px;
+  color: #718096;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #8b7355;
+  box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
 .expense-table {
   width: 100%;
   border-collapse: collapse;
-  background: #ffffff;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
 }
 
-/* Header */
 .expense-table thead {
-  background: linear-gradient(135deg, #6f63d9, #7f76e8);
+  background: #654321;
+  color: white;
 }
 
-.expense-table thead th {
-  padding: 14px 16px;
-  font-size: 13px;
+.expense-table th {
+  padding: 16px;
+  text-align: left;
   font-weight: 600;
+  font-size: 13px;
   text-transform: uppercase;
-  color: #ffffff;
   letter-spacing: 0.5px;
 }
 
-/* Body cells */
-.expense-table tbody td {
-  padding: 14px 16px;
-  font-size: 14px;
-  color: #333;
-}
-
-/* Row separation */
 .expense-table tbody tr {
-  border-bottom: 1px solid #f0f0f0;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s ease;
 }
 
-/* Hover effect */
+.expense-table tbody tr:last-child {
+  border-bottom: none;
+}
+
 .expense-table tbody tr:hover {
-  background: #f9f9ff;
+  background: #f9fafb;
 }
 
-/* Amount styling */
+.expense-table td {
+  padding: 16px;
+  color: #374151;
+  font-size: 14px;
+}
+
 .amount {
-  font-weight: 700;
-  color: #d63031;
-}
-
-/* First column (ID) */
-.expense-table td:first-child {
   font-weight: 600;
-  color: #555;
+  color: #1f2937;
 }
 
-/* Responsive */
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: #9ca3af;
+  font-size: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+.delete-btn:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 768px) {
-  .expense-table thead {
-    display: none;
+  .expense-container {
+    padding: 20px 10px;
   }
 
-  .expense-table,
-  .expense-table tbody,
-  .expense-table tr,
+  .expense-card {
+    padding: 20px;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .search-input {
+    max-width: 100%;
+  }
+
+  .expense-table th,
   .expense-table td {
-    display: block;
-    width: 100%;
+    padding: 12px 8px;
+    font-size: 13px;
   }
-
-  .expense-table tr {
-    margin-bottom: 16px;
-    border-radius: 10px;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  }
-
-  .expense-table td {
-    padding: 12px;
-    text-align: right;
-    position: relative;
-  }
-
-  .expense-table td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 12px;
-    font-weight: 600;
-    color: #666;
-    text-transform: uppercase;
+  
+  .delete-btn {
+    padding: 6px 12px;
     font-size: 12px;
   }
 }
+

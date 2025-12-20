@@ -35,7 +35,7 @@ export class Login {
         this.router.navigate(['/overview']);
       },
       error: () => {
-        alert('Invalid password');
+        alert('Invalid password or Server Error');
       }
     });
   }

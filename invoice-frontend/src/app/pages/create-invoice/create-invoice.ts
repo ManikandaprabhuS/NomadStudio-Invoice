@@ -76,6 +76,49 @@ export class CreateInvoice {
   }
 
   saveInvoice() {
+    // Validate Client Name
+  if (!this.invoice.userName || this.invoice.userName.trim() === '') {
+    alert('Please enter client name');
+    return;
+  }
+
+  // Validate Phone Number
+  if (!this.invoice.phoneNumber || this.invoice.phoneNumber.trim() === '') {
+    alert('Please enter phone number');
+    return;
+  }
+
+  // Validate at least one service exists
+  if (!this.invoice.services || this.invoice.services.length === 0) {
+    alert('Please add at least one item to the invoice');
+    return;
+  }
+
+  // Validate each service has required fields
+  for (let i = 0; i < this.invoice.services.length; i++) {
+    const service = this.invoice.services[i];
+    
+    if (!service.serviceType || service.serviceType === '') {
+      alert(`Please select a service type for item ${i + 1}`);
+      return;
+    }
+    
+    if (!service.quantity || service.quantity <= 0) {
+      alert(`Please enter a valid quantity for item ${i + 1}`);
+      return;
+    }
+    
+    if (!service.pricePerUnit || service.pricePerUnit <= 0) {
+      alert(`Please enter a valid price per unit for item ${i + 1}`);
+      return;
+    }
+  }
+
+  // Validate Received Amount
+  if (this.invoice.receivedAmount === null || this.invoice.receivedAmount === undefined || this.invoice.receivedAmount < 0) {
+    alert('Please enter a valid received amount');
+    return;
+  }
     this.invoiceService.createInvoice(this.invoice)
       .then(() => {
         alert('Invoice saved successfully');

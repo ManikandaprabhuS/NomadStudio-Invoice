@@ -242,6 +242,17 @@ getStartOfFinancialYear(date: Date): Date {
   }
 
    addExpense() {
+     // Validate Expense Amount
+  if (!this.expenseAmount || this.expenseAmount <= 0) {
+    alert('Please enter a valid expense amount');
+    return;
+  }
+
+  // Validate Reason
+  if (!this.expenseReason || this.expenseReason.trim() === '') {
+    alert('Please enter a reason for the expense');
+    return;
+  }
     console.log('Adding expense:', this.expenseAmount, this.expenseReason);
     if (!this.expenseAmount || this.expenseAmount <= 0) {
       alert('Please enter a valid expense amount.');

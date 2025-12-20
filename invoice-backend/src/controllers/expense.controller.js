@@ -3,6 +3,7 @@ const Expense = require('../models/expense');
 // ================= CREATE EXPENSE =================
 exports.createExpense = async (req, res) => {
   try {
+    console.log('[CREATE EXPENSE REQUEST]', req.body);
     const { amount, reason, expenseDate } = req.body;
 
     if (!amount || !reason) {
@@ -18,7 +19,6 @@ exports.createExpense = async (req, res) => {
     });
 
     console.log('[EXPENSE CREATED]', expense._id);
-
     res.status(201).json(expense);
 
   } catch (err) {
@@ -30,6 +30,7 @@ exports.createExpense = async (req, res) => {
 // ================= LIST EXPENSES =================
 exports.getExpenses = async (req, res) => {
   try {
+    console.log('[GET EXPENSES REQUEST]');
     const expenses = await Expense.find().sort({ expenseDate: -1 });
 
     console.log('[EXPENSE LIST FETCHED]', expenses.length);
@@ -45,9 +46,11 @@ exports.getExpenses = async (req, res) => {
 // ================= GET SINGLE EXPENSE =================
 exports.getExpenseById = async (req, res) => {
   try {
+    console.log('[GET EXPENSE REQUEST]', req.params.id);
     const expense = await Expense.findById(req.params.id);
 
     if (!expense) {
+      console.log('[EXPENSE NOT FOUND]', req.params.id);
       return res.status(404).json({ message: 'Expense not found' });
     }
 
@@ -62,6 +65,7 @@ exports.getExpenseById = async (req, res) => {
 // ================= UPDATE EXPENSE =================
 exports.updateExpense = async (req, res) => {
   try {
+    console.log('[UPDATE EXPENSE REQUEST]', req.params.id, req.body);
     const expense = await Expense.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -69,6 +73,7 @@ exports.updateExpense = async (req, res) => {
     );
 
     if (!expense) {
+      console.log('[EXPENSE NOT FOUND]', req.params.id);
       return res.status(404).json({ message: 'Expense not found' });
     }
 
@@ -85,9 +90,11 @@ exports.updateExpense = async (req, res) => {
 // ================= DELETE EXPENSE =================
 exports.deleteExpense = async (req, res) => {
   try {
+    console.log('[DELETE EXPENSE REQUEST]', req.params.id);
     const expense = await Expense.findByIdAndDelete(req.params.id);
 
     if (!expense) {
+      console.log('[EXPENSE NOT FOUND]', req.params.id);
       return res.status(404).json({ message: 'Expense not found' });
     }
 

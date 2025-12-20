@@ -9,20 +9,24 @@
       <!-- Client Details -->
       <div class="left-section">
         <div class="row">
-          <label>Client Name</label>
+          <label>Client Name <span class="required">*</span></label>
           <input
             type="text"
             [(ngModel)]="invoice.userName"
             placeholder="Enter client name"
+            required
+            #clientName
           />
         </div>
 
         <div class="row">
-          <label>Phone Number</label>
+          <label>Phone Number <span class="required">*</span></label>
           <input
             type="text"
             [(ngModel)]="invoice.phoneNumber"
             placeholder="Enter phone number"
+            required
+            #phoneNumber
           />
         </div>
       </div>
@@ -40,17 +44,19 @@
 
     <!-- Item List -->
     <div class="service-section">
-      <h3 class="section-title">Item List</h3>
+      <h3 class="section-title">Item List <span class="required">*</span></h3>
 
       <div
         class="service-row"
         *ngFor="let service of invoice.services; let i = index"
       >
-        <select [(ngModel)]="service.serviceType">
+        <select [(ngModel)]="service.serviceType" required>
           <option value="">Select Service</option>
           <option>Wedding Photography</option>
           <option>Videography</option>
           <option>Drone Shots</option>
+          <option>Photo and Print</option>
+          <option>Print only</option>
           <option>Album Design</option>
           <option>Frame Order</option>
           <option>Pre-Wedding Shoot</option>
@@ -61,6 +67,7 @@
           placeholder="Qty"
           [(ngModel)]="service.quantity"
           (input)="recalculate()"
+          required
         />
 
         <input
@@ -68,6 +75,7 @@
           placeholder="Price / Unit"
           [(ngModel)]="service.pricePerUnit"
           (input)="recalculate()"
+          required
         />
 
         <input
@@ -104,11 +112,13 @@
     <!-- Payment Section -->
     <div class="payment-section">
       <div class="row">
-        <label>Received Amount</label>
+        <label>Received Amount <span class="required">*</span></label>
         <input
           type="number"
           [(ngModel)]="invoice.receivedAmount"
           (input)="recalculate()"
+          required
+          #receivedAmount
         />
       </div>
 

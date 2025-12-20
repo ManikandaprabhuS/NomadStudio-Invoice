@@ -185,4 +185,8 @@ select {
   min-width: 0;
   box-sizing: border-box;
 }
+.required {
+  color: #e53e3e;
+  margin-left: 4px;
+}
 }
