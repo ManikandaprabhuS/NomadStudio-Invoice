@@ -20,7 +20,7 @@ export class Clients {
   filteredClients: any[] = [];
 
 
-  pageSize = 5;
+  pageSize = 10;
   currentPage = 1;
   totalPages = 1;
 
