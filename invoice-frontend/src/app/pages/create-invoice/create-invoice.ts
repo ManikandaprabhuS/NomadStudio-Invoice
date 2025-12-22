@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Invoice } from '../service/invoice';
 import { CommonModule } from '@angular/common';
+import { AlertService } from '../service/alert.service';
 
 @Component({
   selector: 'app-create-invoice',
   standalone: true,                // ✅ REQUIRED
-  imports: [CommonModule, FormsModule], 
+  imports: [CommonModule, FormsModule],
   templateUrl: './create-invoice.html',
   styleUrl: './create-invoice.css',
 })
@@ -39,8 +40,9 @@ export class CreateInvoice {
 
   constructor(
     private invoiceService: Invoice,
-    private router: Router
-  ) {}
+    private router: Router,
+    private alertService: AlertService
+  ) { }
 
   addService() {
     this.invoice.services.push({
@@ -77,54 +79,54 @@ export class CreateInvoice {
 
   saveInvoice() {
     // Validate Client Name
-  if (!this.invoice.userName || this.invoice.userName.trim() === '') {
-    alert('Please enter client name');
-    return;
-  }
-
-  // Validate Phone Number
-  if (!this.invoice.phoneNumber || this.invoice.phoneNumber.trim() === '') {
-    alert('Please enter phone number');
-    return;
-  }
-
-  // Validate at least one service exists
-  if (!this.invoice.services || this.invoice.services.length === 0) {
-    alert('Please add at least one item to the invoice');
-    return;
-  }
-
-  // Validate each service has required fields
-  for (let i = 0; i < this.invoice.services.length; i++) {
-    const service = this.invoice.services[i];
-    
-    if (!service.serviceType || service.serviceType === '') {
-      alert(`Please select a service type for item ${i + 1}`);
+    if (!this.invoice.userName || this.invoice.userName.trim() === '') {
+      this.alertService.error('Please enter client name');
       return;
     }
-    
-    if (!service.quantity || service.quantity <= 0) {
-      alert(`Please enter a valid quantity for item ${i + 1}`);
-      return;
-    }
-    
-    if (!service.pricePerUnit || service.pricePerUnit <= 0) {
-      alert(`Please enter a valid price per unit for item ${i + 1}`);
-      return;
-    }
-  }
 
-  // Validate Received Amount
-  if (this.invoice.receivedAmount === null || this.invoice.receivedAmount === undefined || this.invoice.receivedAmount < 0) {
-    alert('Please enter a valid received amount');
-    return;
-  }
+    // Validate Phone Number
+    if (!this.invoice.phoneNumber || this.invoice.phoneNumber.trim() === '') {
+      this.alertService.error('Please enter phone number');
+      return;
+    }
+
+    // Validate at least one service exists
+    if (!this.invoice.services || this.invoice.services.length === 0) {
+      this.alertService.error('Please add at least one item to the invoice');
+      return;
+    }
+
+    // Validate each service has required fields
+    for (let i = 0; i < this.invoice.services.length; i++) {
+      const service = this.invoice.services[i];
+
+      if (!service.serviceType || service.serviceType === '') {
+        this.alertService.error(`Please select a service type for item ${i + 1}`);
+        return;
+      }
+
+      if (!service.quantity || service.quantity <= 0) {
+        this.alertService.error(`Please enter a valid quantity for item ${i + 1}`);
+        return;
+      }
+
+      if (!service.pricePerUnit || service.pricePerUnit <= 0) {
+        this.alertService.error(`Please enter a valid price per unit for item ${i + 1}`);
+        return;
+      }
+    }
+
+    // Validate Received Amount
+    if (this.invoice.receivedAmount === null || this.invoice.receivedAmount === undefined || this.invoice.receivedAmount < 0) {
+      this.alertService.error('Please enter a valid received amount');
+      return;
+    }
     this.invoiceService.createInvoice(this.invoice)
       .then(() => {
-        alert('Invoice saved successfully');
+        this.alertService.success('Invoice saved successfully');
       })
       .catch(() => {
-        alert('Failed to save invoice');
+        this.alertService.error('Failed to save invoice');
       });
   }
 

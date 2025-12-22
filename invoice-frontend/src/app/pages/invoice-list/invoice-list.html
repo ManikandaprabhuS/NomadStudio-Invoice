@@ -1,29 +1,100 @@
 <div class="invoice-list-container">
-  <h2 class="page-title">Invoice List</h2>
+  <div class="header-section">
+    <h2 class="page-title">Invoices</h2>
 
-  <input class="invoice-search" placeholder="Search by name or phone" [(ngModel)]="searchTerm"
-    (ngModelChange)="applyFilter()" />
+    <div class="header-actions">
+      <div class="search-box">
+        <input class="invoice-search" placeholder="Search invoices..." [(ngModel)]="searchTerm"
+          (ngModelChange)="applyFilter()" />
+      </div>
 
-  <div class="bulk-actions" *ngIf="selectedCount > 0">
-    <button class="btn-primary" *ngIf="selectedCount === 1" (click)="openPreview()">View Invoice</button>
-    <button class="btn-primary" *ngIf="selectedCount > 1" (click)="exportCsv()">Export CSV</button>
+      <div class="bulk-actions" *ngIf="selectedCount > 0">
+        <button class="btn-pagination" *ngIf="selectedCount === 1" (click)="openPreview()">
+          👁️ View
+        </button>
+        <button class="btn-pagination" *ngIf="selectedCount > 1" (click)="exportCsv()">
+          📥 Export CSV
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="table-wrapper">
+  <div class="table-container">
     <table class="invoice-table">
       <thead>
         <tr>
-          <th><input type="checkbox" (change)="toggleSelectAll($event)" /></th>
+          <th style="width: 40px;"><input type="checkbox" (change)="toggleSelectAll($event)" /></th>
           <th>ID</th>
+          <th>Client Details</th>
+          <th>Total Amount</th>
+          <th>Balance</th>
           <th>Client Name</th>
           <th>PhoneNumber</th>
           <th>Total Amount</th>
           <th>Received Amount</th>
           <th>Balance Amount</th>
           <th>Date</th>
+          <th style="text-align: right;">Actions</th>
         </tr>
       </thead>
       <tbody>
+        <tr class="invoice-row" *ngFor="let inv of paginatedInvoices; let i = index">
+          <td>
+            <input type="checkbox" [(ngModel)]="inv.selected" (change)="onSelectionChange()"
+              (click)="$event.stopPropagation()" />
+          </td>
+          <td data-label="ID">#{{ i + 1 + (currentPage - 1) * pageSize }}</td>
+
+          <td data-label="Client">
+            <div class="client-info">
+              <span class="client-name" *ngIf="editingInvoice?._id !== inv._id">{{ inv.userName }}</span>
+              <input class="edit-input" *ngIf="editingInvoice?._id === inv._id" [(ngModel)]="editingInvoice.userName" />
+
+              <span class="client-phone" *ngIf="editingInvoice?._id !== inv._id">{{ inv.phoneNumber }}</span>
+              <input class="edit-input" *ngIf="editingInvoice?._id === inv._id" [(ngModel)]="editingInvoice.phoneNumber"
+                style="margin-top: 4px;" />
+            </div>
+          </td>
+
+          <td data-label="Total">
+            <span class="amount-cell" *ngIf="editingInvoice?._id !== inv._id">₹ {{ inv.totalAmount | number }}</span>
+            <input class="edit-input" type="number" *ngIf="editingInvoice?._id === inv._id"
+              [(ngModel)]="editingInvoice.totalAmount" />
+          </td>
+
+          <td data-label="Balance">
+            <span class="amount-cell" [style.color]="inv.balanceAmount > 0 ? 'var(--accent-amber)' : 'inherit'">
+              ₹ {{ inv.balanceAmount | number }}
+            </span>
+          </td>
+
+          <td data-label="Date">
+            <span class="date-cell">{{ inv.createdAt | date:'dd MMM yyyy' }}</span>
+          </td>
+
+          <td>
+            <div class="action-buttons">
+              <!-- Default Actions -->
+              <button *ngIf="editingInvoice?._id !== inv._id" class="btn-action"
+                (click)="editInvoice(inv); $event.stopPropagation()" title="Edit">
+                ✏️
+              </button>
+              <button *ngIf="editingInvoice?._id !== inv._id" class="btn-action danger"
+                (click)="deleteInvoice(inv._id); $event.stopPropagation()" title="Delete">
+                🗑️
+              </button>
+
+              <!-- Edit Mode Actions -->
+              <button *ngIf="editingInvoice?._id === inv._id" class="btn-action"
+                (click)="saveEdit(); $event.stopPropagation()" title="Save">
+                ✅
+              </button>
+              <button *ngIf="editingInvoice?._id === inv._id" class="btn-action danger"
+                (click)="cancelEdit(); $event.stopPropagation()" title="Cancel">
+                ❌
+              </button>
+            </div>
+          </td>
         <tr *ngFor="let inv of paginatedInvoices; let i = index">
           <td><input type="checkbox" [(ngModel)]="inv.selected" (change)="onSelectionChange()" /></td>
           <td>{{ inv._id }}</td>
@@ -49,6 +120,18 @@
             Next
         </button>
     </div>
+  </div>
+
+  <div class="pagination-container" *ngIf="totalPages > 1">
+    <button (click)="prevPage()" [disabled]="currentPage === 1" class="btn-pagination">
+      Previous
+    </button>
+    <span class="page-info">
+      {{ currentPage }} / {{ totalPages }}
+    </span>
+    <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="btn-pagination">
+      Next
+    </button>
   </div>
 </div>
 

@@ -1,63 +1,93 @@
 <div class="overview-container">
 
+  <!-- Header Section -->
   <div class="header-row">
-    <h2 class="page-title">Overview</h2>
-    <select [(ngModel)]="selectedFilter" (change)="applyPresetFilter()">
-      <option value="today">Today</option>
-      <option value="week">This Week</option>
-      <option value="month">This Month</option>
-      <option value="year">This Year</option>
-    </select>
+    <h2 class="page-title">Overview Dashboard</h2>
 
-    <small class="hint">
-      Showing data for: {{ selectedFilter | titlecase }}
-    </small>
-    <input type="date" [(ngModel)]="fromDate" (change)="applyCustomDateFilter()" />
+    <div class="filter-bar">
+      <select [(ngModel)]="selectedFilter" (change)="applyPresetFilter()">
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="year">This Year</option>
+      </select>
 
-    <span class="to-text">to</span>
+      <span class="to-separator">|</span>
 
-    <input type="date" [(ngModel)]="toDate" (change)="applyCustomDateFilter()" />
-
+      <input type="date" [(ngModel)]="fromDate" (change)="applyCustomDateFilter()" />
+      <span class="to-separator">to</span>
+      <input type="date" [(ngModel)]="toDate" (change)="applyCustomDateFilter()" />
+    </div>
   </div>
 
-  <div *ngIf="loading">Loading dashboard…</div>
+  <!-- Loading Indicator -->
+  <div *ngIf="loading" class="loading-state">
+    <p>Loading your financial snapshot...</p>
+  </div>
 
+  <!-- KPI Metrics Grid -->
   <div class="stats-grid" *ngIf="!loading">
-    <div class="stat-card">
-      <p>Total Clients</p>
-      <h3>{{ totalClients }}</h3>
+    <div class="stat-card clients">
+      <div class="card-header">
+        <span class="label">Total Clients</span>
+        <div class="card-icon">👥</div>
+      </div>
+      <h3 class="value">{{ totalClients }}</h3>
     </div>
 
     <div class="stat-card income">
-      <p>Total Income</p>
-      <h3>₹ {{ totalIncome }}</h3>
+      <div class="card-header">
+        <span class="label">Total Income</span>
+        <div class="card-icon">💰</div>
+      </div>
+      <h3 class="value">₹ {{ totalIncome | number:'1.0-0' }}</h3>
     </div>
 
     <div class="stat-card received">
-      <p>Received</p>
-      <h3>₹ {{ totalReceived }}</h3>
+      <div class="card-header">
+        <span class="label">Payments Received</span>
+        <div class="card-icon">✅</div>
+      </div>
+      <h3 class="value">₹ {{ totalReceived | number:'1.0-0' }}</h3>
     </div>
 
     <div class="stat-card balance">
-      <p>Balance</p>
-      <h3>₹ {{ totalBalance }}</h3>
+      <div class="card-header">
+        <span class="label">Outstanding Balance</span>
+        <div class="card-icon">⏳</div>
+      </div>
+      <h3 class="value">₹ {{ totalBalance | number:'1.0-0' }}</h3>
     </div>
   </div>
 
+  <!-- Main Content Row -->
   <div class="overview-bottom" *ngIf="!loading">
+
+    <!-- Revenue Chart -->
     <div class="chart-card">
-      <h4>Income vs Expense</h4>
-      <canvas #incomeChart></canvas>
+      <h4>Income vs Expenses</h4>
+      <div class="chart-wrapper">
+        <canvas #incomeChart></canvas>
+      </div>
     </div>
 
+    <!-- Quick Expense Form -->
     <div class="expense-card">
-      <h4>Add Expense</h4>
+      <h4>Quick Add Expense</h4>
 
-      <input type="number" placeholder="Expense Amount" [(ngModel)]="expenseAmount" required />
-      <input type="text" placeholder="Reason" [(ngModel)]="expenseReason" required />
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" placeholder="0.00" [(ngModel)]="expenseAmount" required />
+      </div>
 
-      <button (click)="addExpense()">Add</button>
+      <div class="form-group">
+        <label>Reason / Category</label>
+        <input type="text" placeholder="e.g. Server Hosting" [(ngModel)]="expenseReason" required />
+      </div>
+
+      <button class="expense-btn" (click)="addExpense()">Add Expense</button>
     </div>
+
   </div>
 
 </div>

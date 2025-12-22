@@ -1,16 +1,23 @@
-/* Push entire app below navbar */
 .layout {
     display: flex;
-    min-height: 100vh;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     height: calc(100vh - 64px);
-    /* exact navbar height */
-    margin-top: 64px;
     overflow: hidden;
+    box-sizing: border-box;
+    z-index: 1100;
+    /* Higher than navbar so modals inside can cover it */
+    background: #fcfbf8;
+    /* Consistent dashboard bg */
 }
 
 /* Sidebar */
 .sidebar {
-    width: 220px;
+    width: 260px;
+    /* Increased for oval breathing room */
     flex-shrink: 0;
     overflow-y: auto;
 }
@@ -18,9 +25,11 @@
 /* Main content */
 .content {
     flex: 1;
-    padding: 24px;
-    background: #f9f9f9;
-    min-height: calc(100vh - 64px);
+    padding: 0;
+    /* Remove redundant padding, let pages handle it */
+    background: #fcfbf8;
+    /* Warm light background */
+    height: 100%;
     overflow-y: auto;
 }
 
@@ -31,11 +40,12 @@
         top: 64px;
         left: 0;
         height: calc(100vh - 64px);
-        width: 220px;
+        width: 260px;
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         background: #fff;
         z-index: 1000;
+        overflow-y: hidden;
     }
 
     .sidebar.open {

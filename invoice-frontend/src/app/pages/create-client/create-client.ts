@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Client } from '../service/client';
+import { AlertService } from '../service/alert.service';
 
 @Component({
   selector: 'app-create-client',
@@ -21,18 +22,18 @@ export class CreateClient {
   };
   loading = false;
 
-  constructor(private clientService: Client, private router: Router) { }
+  constructor(private clientService: Client, private router: Router, private alertService: AlertService) { }
 
   saveClient() {
     this.loading = true;
     this.clientService.createClient(this.client).subscribe({
       next: () => {
-        alert('Client saved successfully');
+        this.alertService.success('Client saved successfully');
         this.loading = false;
         this.resetClient();  // if you have a method to clear the form
       },
       error: () => {
-        alert('Failed to save client');
+        this.alertService.error('Failed to save client');
         this.loading = false;
       }
     });

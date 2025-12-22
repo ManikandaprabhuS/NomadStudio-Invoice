@@ -1,0 +1,29 @@
+<div class="alert-container">
+    @for (alert of alertService.alerts$(); track alert.id) {
+    <div class="alert" [ngClass]="alert.type" (click)="alertService.removeAlert(alert.id)">
+        <div class="icon-section">
+            <!-- Check Icon -->
+            <svg *ngIf="alert.type === 'success'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+
+            <!-- Error/Exclamation Icon -->
+            <svg *ngIf="alert.type === 'error'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+
+        <div class="content-section">
+            <div class="alert-title">{{ alert.title }}</div>
+            <div class="alert-message">{{ alert.message }}</div>
+        </div>
+
+        <div class="close-btn">&times;</div>
+    </div>
+    }
+</div>

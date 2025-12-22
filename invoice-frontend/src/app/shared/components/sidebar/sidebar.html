@@ -1,31 +1,48 @@
 <aside class="sidebar">
-    <ul>
-        <li>
-            <a routerLink="/overview" routerLinkActive="active">Overview</a>
-        </li>
-        <li>
-            <a routerLink="/invoices" routerLinkActive="active">Invoice</a>
-        </li>
-        <li>
-            <a routerLink="/listinvoices" routerLinkActive="active">Invoice List</a>
-        </li>
-        <li>
-            <a routerLink="/addclient" routerLinkActive="active">Add New Client</a>
-        </li>
-        <li>
-            <a routerLink="/clients" routerLinkActive="active">Client Details</a>
-        </li>
-        <li>
-            <a routerLink="/expense" routerLinkActive="active">Expense Details</a>
-        </li>
-        <li>
-            <a routerLink="/support" routerLinkActive="active">Get Support</a>
-        </li>
-    </ul>
-    <!-- Logout appears ONLY on mobile -->
-    <div class="mobile-only logout-wrapper">
-        <button type="button" (click)="logout()" class="nav-logout desktop-only">
-            Logout
-        </button>
+    <div class="sidebar-inner">
+        <ul class="nav-list">
+            <li>
+                <a routerLink="/overview" routerLinkActive="active">
+                    <span class="nav-text">Overview</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/invoices" routerLinkActive="active">
+                    <span class="nav-text">Create Invoice</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/listinvoices" routerLinkActive="active">
+                    <span class="nav-text">Invoice List</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/addclient" routerLinkActive="active">
+                    <span class="nav-text">Add Client</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/clients" routerLinkActive="active">
+                    <span class="nav-text">Client Details</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/expense" routerLinkActive="active">
+                    <span class="nav-text">Expense Details</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/support" routerLinkActive="active">
+                    <span class="nav-text">Support</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Logout appears ONLY on small screens -->
+        <div class="mobile-only logout-wrapper">
+            <button type="button" (click)="logout()" class="btn-logout-mobile">
+                <span>Logout</span>
+            </button>
+        </div>
     </div>
 </aside>

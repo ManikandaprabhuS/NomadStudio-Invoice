@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Client } from '../service/client';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AlertService } from '../service/alert.service'; // Added import
 
 @Component({
   selector: 'app-clients',
@@ -25,7 +26,7 @@ export class Clients {
   totalPages = 1;
 
 
-  constructor(private clientService: Client) {
+  constructor(private clientService: Client, private alertService: AlertService) {
 
   }
 
@@ -106,12 +107,12 @@ export class Clients {
 
     this.clientService.updateClient(this.editingClient._id, this.editingClient).subscribe({
       next: () => {
-        alert('Client updated successfully');
+        this.alertService.success('Client updated successfully');
         this.editingClient = null;
         this.fetchClients();
       },
       error: () => {
-        alert('Failed to update client');
+        this.alertService.error('Failed to update client');
       }
     });
   }
@@ -125,11 +126,11 @@ export class Clients {
 
     this.clientService.deleteClient(id).subscribe({
       next: () => {
-        alert('Client deleted successfully');
+        this.alertService.success('Client deleted successfully');
         this.fetchClients();
       },
       error: () => {
-        alert('Failed to delete client');
+        this.alertService.error('Failed to delete client');
       }
     });
   }

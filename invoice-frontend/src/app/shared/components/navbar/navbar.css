@@ -2,12 +2,14 @@
 .header {
     height: 64px;
     background-color: #fff;
-    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(139, 94, 60, 0.08);
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
+    /* Adjusted to allow modals in layout to go above */
+    border-bottom: 1px solid #e8e4db;
 }
 
 .nav-inner {
@@ -41,26 +43,30 @@
 }
 
 .studio-name {
-    font-size: 1.4em;
-    font-weight: bold;
-    color: #A0522D;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #8B5E3C;
+    /* Warm Brown */
+    letter-spacing: -0.5px;
 }
 
 /* Logout */
 .nav-logout {
     margin-left: auto;
-    padding: 10px 14px;
-    border-radius: 12px;
-    text-decoration: none;
-    color: #333;
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: #8B5E3C;
+    color: #fff;
+    font-weight: 600;
     font-size: 14px;
+    border: none;
+    cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.nav-logout:hover,
-.nav-logout.active {
-    color: #d32f2f;
-    background: #fff5f5;
+.nav-logout:hover {
+    background: #6d4a2f;
+    box-shadow: 0 4px 10px rgba(139, 94, 60, 0.2);
 }
 
 /* Responsive */

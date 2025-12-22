@@ -27,7 +27,7 @@ export class Login {
     this.http.post<any>('http://localhost:5000/auth/login', {
       userName: this.userName,
       password: this.password
-      
+
     }).subscribe({
       next: (res) => {
         localStorage.setItem('token', res.token);

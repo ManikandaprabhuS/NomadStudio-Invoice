@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { Invoice } from '../service/invoice';
 
 import { InvoiceTemplateComponent } from '../../shared/components/invoice-template/invoice-template.component';
+import { AlertService } from '../service/alert.service';
 
 @Component({
   selector: 'app-invoice-list',
+  standalone: true,
   imports: [FormsModule, CommonModule, InvoiceTemplateComponent],
   templateUrl: './invoice-list.html',
   styleUrls: ['./invoice-list.css']
@@ -22,12 +24,13 @@ export class InvoiceList implements OnInit {
 
   searchTerm = '';
   selectedCount = 0;
+  editingInvoice: any = null;
 
-  pageSize = 5;
+  pageSize = 4;
   currentPage = 1;
   totalPages = 1;
 
-  constructor(private invoiceService: Invoice) { }
+  constructor(private invoiceService: Invoice, private alertService: AlertService) { }
 
   ngOnInit(): void {
     this.loadInvoices();
@@ -89,7 +92,7 @@ export class InvoiceList implements OnInit {
   openPreview() {
     const selected = this.invoices.find(i => i.selected);
     if (!selected) {
-      alert('Select one invoice');
+      this.alertService.error('Select one invoice');
       return;
     }
     this.selectedInvoice = selected;
@@ -155,7 +158,7 @@ export class InvoiceList implements OnInit {
   exportCsv() {
     const selected = this.invoices.filter(i => i.selected);
     if (!selected.length) {
-      alert('No invoices selected');
+      this.alertService.error('No invoices selected');
       return;
     }
 
@@ -197,5 +200,39 @@ export class InvoiceList implements OnInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  /* ---------- EDIT / DELETE ---------- */
+  editInvoice(invoice: any) {
+    this.editingInvoice = { ...invoice };
+  }
+
+  saveEdit() {
+    if (!this.editingInvoice) return;
+
+    this.invoiceService.updateInvoice(this.editingInvoice._id, this.editingInvoice).then(() => {
+      this.alertService.success('Invoice updated successfully');
+      this.editingInvoice = null;
+      this.loadInvoices();
+    }).catch(err => {
+      console.error('Update failed', err);
+      this.alertService.error('Failed to update invoice');
+    });
+  }
+
+  cancelEdit() {
+    this.editingInvoice = null;
+  }
+
+  deleteInvoice(id: string) {
+    if (!confirm('Are you sure you want to delete this invoice?')) return;
+
+    this.invoiceService.deleteInvoice(id).then(() => {
+      this.alertService.success('Invoice deleted successfully');
+      this.loadInvoices();
+    }).catch(err => {
+      console.error('Delete failed', err);
+      this.alertService.error('Failed to delete invoice');
+    });
   }
 }

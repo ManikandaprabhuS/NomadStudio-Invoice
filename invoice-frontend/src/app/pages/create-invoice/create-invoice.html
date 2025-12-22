@@ -1,139 +1,135 @@
-<div class="invoice-container">
+<div class="create-invoice-wrapper">
+  <!-- Header Actions -->
+  <div class="header-section">
+    <div class="breadcrumb-nav">
+      <span class="root">Invoices</span>
+      <span class="separator">/</span>
+      <span class="active">Create New Invoice</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline" (click)="goToList()">View All Invoices</button>
+      <button class="btn-outline danger" (click)="clearInvoice()">Clear Form</button>
+      <button class="btn-primary" (click)="saveInvoice()">Save Invoice ✨</button>
+    </div>
+  </div>
+
   <div class="invoice-card">
-
-    <h2 class="title">Create Invoice</h2>
-
-    <!-- Top Section -->
-    <div class="main-layout">
-
-      <!-- Client Details -->
-      <div class="left-section">
-        <div class="row">
-          <label>Client Name <span class="required">*</span></label>
-          <input
-            type="text"
-            [(ngModel)]="invoice.userName"
-            placeholder="Enter client name"
-            required
-            #clientName
-          />
-        </div>
-
-        <div class="row">
-          <label>Phone Number <span class="required">*</span></label>
-          <input
-            type="text"
-            [(ngModel)]="invoice.phoneNumber"
-            placeholder="Enter phone number"
-            required
-            #phoneNumber
-          />
+    <!-- Billing Details Section -->
+    <div class="billing-grid">
+      <!-- Bill From (Owner) -->
+      <div class="billing-section">
+        <span class="section-badge">Bill From</span>
+        <div class="owner-details-card">
+          <div class="company-logo-placeholder">
+            <span class="logo-text">NS</span>
+          </div>
+          <div class="owner-info">
+            <h4 class="company-name">{{ invoice.ownerDetails.companyName }}</h4>
+            <p class="address">{{ invoice.ownerDetails.address }}</p>
+            <p class="contact">📞 {{ invoice.ownerDetails.phoneNumber }}</p>
+          </div>
         </div>
       </div>
 
-      <!-- Owner Details -->
-      <div class="right-section">
-        <div class="owner-box">
-          <h4>Owner Details</h4>
-          <p><strong>{{ invoice.ownerDetails.companyName }}</strong></p>
-          <p>{{ invoice.ownerDetails.address }}</p>
-          <p>Phone: {{ invoice.ownerDetails.phoneNumber }}</p>
+      <!-- Bill To (Client) -->
+      <div class="billing-section">
+        <span class="section-badge">Bill To</span>
+        <div class="client-input-group">
+          <div class="field-row">
+            <div class="input-field">
+              <label>Client Name <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="invoice.userName" placeholder="Enter client name" required #clientName />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="input-field">
+              <label>Phone Number <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="invoice.phoneNumber" placeholder="Enter phone number" required
+                #phoneNumber />
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Item List -->
-    <div class="service-section">
-      <h3 class="section-title">Item List <span class="required">*</span></h3>
-
-      <div
-        class="service-row"
-        *ngFor="let service of invoice.services; let i = index"
-      >
-        <select [(ngModel)]="service.serviceType" required>
-          <option value="">Select Service</option>
-          <option>Wedding Photography</option>
-          <option>Videography</option>
-          <option>Drone Shots</option>
-          <option>Photo and Print</option>
-          <option>Print only</option>
-          <option>Album Design</option>
-          <option>Frame Order</option>
-          <option>Pre-Wedding Shoot</option>
-        </select>
-
-        <input
-          type="number"
-          placeholder="Qty"
-          [(ngModel)]="service.quantity"
-          (input)="recalculate()"
-          required
-        />
-
-        <input
-          type="number"
-          placeholder="Price / Unit"
-          [(ngModel)]="service.pricePerUnit"
-          (input)="recalculate()"
-          required
-        />
-
-        <input
-          type="number"
-          placeholder="Amount"
-          [value]="service.amountCharged"
-          disabled
-        />
-    
-        <input
-          type="text"
-          placeholder="Notes"
-          [(ngModel)]="service.notes"
-        />
-
-        <button
-          type="button"
-          class="remove-btn"
-          (click)="removeService(i)"
-        >
-          ✕
-        </button>
+    <!-- Itemized List Section -->
+    <div class="service-table-section">
+      <div class="table-header">
+        <h3 class="section-title">Itemized Services</h3>
       </div>
 
-      <button
-        type="button"
-        class="add-item-btn"
-        (click)="addService()"
-      >
-        + Add Another Item
+      <table class="services-list">
+        <thead>
+          <tr>
+            <th class="col-service">Service Type</th>
+            <th class="col-qty">Qty</th>
+            <th class="col-price">Rate (₹)</th>
+            <th class="col-amount">Amount (₹)</th>
+            <th class="col-notes">Notes</th>
+            <th class="col-action"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let service of invoice.services; let i = index" class="service-row-item">
+            <td data-label="Service Type">
+              <select class="service-select" [(ngModel)]="service.serviceType" required>
+                <option value="" disabled>Select Service</option>
+                <option>Wedding Photography</option>
+                <option>Videography</option>
+                <option>Drone Shots</option>
+                <option>Photo and Print</option>
+                <option>Print only</option>
+                <option>Album Design</option>
+                <option>Frame Order</option>
+                <option>Pre-Wedding Shoot</option>
+              </select>
+            </td>
+            <td data-label="Qty">
+              <input type="number" class="table-input" placeholder="0" [(ngModel)]="service.quantity"
+                (input)="recalculate()" required />
+            </td>
+            <td data-label="Rate">
+              <input type="number" class="table-input" placeholder="0.00" [(ngModel)]="service.pricePerUnit"
+                (input)="recalculate()" required />
+            </td>
+            <td data-label="Amount">
+              <span class="amount-display">₹ {{ service.amountCharged | number:'1.0-0' }}</span>
+            </td>
+            <td data-label="Notes">
+              <input type="text" class="table-input" placeholder="Optional notes" [(ngModel)]="service.notes" />
+            </td>
+            <td class="text-right">
+              <button type="button" class="btn-remove" (click)="removeService(i)" title="Remove item">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button type="button" class="btn-add-line" (click)="addService()">
+        <span class="plus-icon">+</span>
+        Add Another Line Item
       </button>
     </div>
 
-    <!-- Payment Section -->
-    <div class="payment-section">
-      <div class="row">
-        <label>Received Amount <span class="required">*</span></label>
-        <input
-          type="number"
-          [(ngModel)]="invoice.receivedAmount"
-          (input)="recalculate()"
-          required
-          #receivedAmount
-        />
-      </div>
-
-      <div class="balance-box">
-        <span>Balance Amount</span>
-        <strong>₹ {{ invoice.balanceAmount | number:'1.0-0' }}</strong>
+    <!-- Summary Footer Section -->
+    <div class="invoice-footer">
+      <div class="summary-group">
+        <div class="summary-row total">
+          <span>Subtotal</span>
+          <span class="value">₹ {{ invoice.totalAmount | number:'1.0-0' }}</span>
+        </div>
+        <div class="summary-row received">
+          <label>Amount Received (₹)</label>
+          <input type="number" class="summary-input" [(ngModel)]="invoice.receivedAmount" (input)="recalculate()"
+            required #receivedAmount />
+        </div>
+        <div class="summary-row balance-due">
+          <span class="label">Balance Due</span>
+          <span class="value">₹ {{ invoice.balanceAmount | number:'1.0-0' }}</span>
+        </div>
       </div>
     </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <button class="btn-primary" (click)="saveInvoice()">Save Invoice</button>
-      <button class="btn-secondary" (click)="clearInvoice()">Clear</button>
-      <button class="btn-outline" (click)="goToList()">Invoice List</button>
-    </div>
-
   </div>
 </div>

@@ -8,6 +8,7 @@ import { error } from 'node:console';
 import { Expense } from '../service/expense';
 import { Chart, ChartConfiguration, registerables } from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { AlertService } from '../service/alert.service';
 
 
 @Component({
@@ -36,7 +37,8 @@ export class Overview implements OnInit {
     private invoiceService: Invoice,
     private clientService: Client,
     private expenseService: Expense,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private alertService: AlertService
   ) { }
 
   // ================= NEW (FILTER SUPPORT) =================
@@ -238,19 +240,19 @@ export class Overview implements OnInit {
           {
             label: 'Income',
             data: income,
-            backgroundColor: '#28a745', // Green
-            borderColor: '#28a745',
+            backgroundColor: '#10B981', // Emerald Green
+            borderColor: '#10B981',
             borderWidth: 1,
-            borderRadius: 4,
+            borderRadius: 8,
             barPercentage: 0.6,
           },
           {
             label: 'Expense',
             data: expense,
-            backgroundColor: '#dc3545', // Red
-            borderColor: '#dc3545',
+            backgroundColor: '#EF4444', // Coral Red
+            borderColor: '#EF4444',
             borderWidth: 1,
-            borderRadius: 4,
+            borderRadius: 8,
             barPercentage: 0.6,
           }
         ]
@@ -269,9 +271,11 @@ export class Overview implements OnInit {
               return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
             },
             font: {
-              weight: 'bold'
+              weight: 600,
+              family: "'Inter', sans-serif",
+              size: 11
             },
-            color: '#666'
+            color: '#6B7280'
           },
           tooltip: {
             enabled: false // 🔹 Disable tooltips
@@ -356,18 +360,18 @@ export class Overview implements OnInit {
   addExpense() {
     // Validate Expense Amount
     if (!this.expenseAmount || this.expenseAmount <= 0) {
-      alert('Please enter a valid expense amount');
+      this.alertService.error('Please enter a valid expense amount');
       return;
     }
 
     // Validate Reason
     if (!this.expenseReason || this.expenseReason.trim() === '') {
-      alert('Please enter a reason for the expense');
+      this.alertService.error('Please enter a reason for the expense');
       return;
     }
     console.log('Adding expense:', this.expenseAmount, this.expenseReason);
     if (!this.expenseAmount || this.expenseAmount <= 0) {
-      alert('Please enter a valid expense amount.');
+      this.alertService.error('Please enter a valid expense amount.');
       return;
     }
     const playload = {
@@ -377,7 +381,7 @@ export class Overview implements OnInit {
 
     this.expenseService.addExpense(playload).subscribe({
       next: () => {
-        alert('Expense added successfully.');
+        this.alertService.success('Expense added successfully.');
         this.expenseAmount = 0;
         this.expenseReason = '';
 
@@ -385,7 +389,7 @@ export class Overview implements OnInit {
       },
       error: (err) => {
         console.error('Failed to add expense', err);
-        alert('Failed to add expense. Please try again.');
+        this.alertService.error('Failed to add expense. Please try again.');
       }
     });
 
