@@ -29,6 +29,11 @@ export class Overview implements OnInit {
   expenseAmount: number = 0;
   expenseReason: string = '';
 
+  // Quick Income Form Properties
+  incomeServiceType: string = '';
+  incomeAmount: number = 0;
+  incomeClientName: string = 'Walk-in Customer';
+
   @ViewChild('incomeChart') incomeChartRef!: ElementRef<HTMLCanvasElement>;
   chart: Chart | null = null;
   allExpenses: any[] = [];
@@ -393,5 +398,58 @@ export class Overview implements OnInit {
       }
     });
 
+  }
+
+  addQuickIncome(){
+    if (!this.incomeServiceType || !this.incomeAmount || this.incomeAmount <= 0) {
+      this.alertService.error('Please fill all required fields');
+      return;
+    }
+
+    // Create invoice object matching YOUR EXACT schema
+  const quickInvoice = {
+    userName: this.incomeClientName || 'Walk-in Customer',
+    phoneNumber: '0000000000',
+    services: [
+      {
+        serviceType: this.incomeServiceType,
+        quantity: 1,
+        pricePerUnit: this.incomeAmount,        // ✅ Changed from 'price'
+        amountCharged: this.incomeAmount,       // ✅ Added this field
+        notes: 'Quick income entry'
+      }
+    ],
+    totalAmount: this.incomeAmount,
+    receivedAmount: this.incomeAmount,
+    balanceAmount: 0,
+    ownerDetails: {                              // ✅ Added owner details
+      companyName: "Nomad Studio Pvt Ltd",
+      ownerName: "Suriya",
+      phoneNumber: "+91 1234567890",
+      address: "Dharapuram Road, Oddanchatram-624619, Tamil Nadu"
+    }
+  };
+    console.log('💰 Adding quick income:', quickInvoice);
+      this.invoiceService.createInvoice(quickInvoice)
+      .then((response) => {
+        console.log('✅ Income added:', response);
+        this.alertService.success('Income added successfully!');
+        
+        // Reset form
+        this.resetIncomeForm();
+        
+        // Reload invoices to show updated data
+        this.loadDashboardData();
+      })
+      .catch((err) => {
+        console.error('❌ Failed to add income:', err);
+        this.alertService.error('Failed to add income');
+      });
+
+    }
+  resetIncomeForm() {
+    this.incomeServiceType = '';
+    this.incomeAmount = 0;
+    this.incomeClientName = 'Walk-in Customer';
   }
 }

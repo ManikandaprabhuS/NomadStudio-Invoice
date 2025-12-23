@@ -432,4 +432,126 @@
     font-size: 16px;
     margin-bottom: 20px;
   }
+  /* ============================================
+   QUICK ADD INCOME FORM - FIXED
+   ============================================ */
+
+.income-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.income-card h4 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Form Groups */
+.income-card .form-group {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.income-card .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ALL Form Controls - Input and Select */
+.income-card .form-group input,
+.income-card .form-group select {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 10px 12px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  background-color: white !important;
+  transition: border-color 0.2s;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+/* Select Specific Styling */
+.income-card .form-group select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  padding-right: 35px !important;
+  cursor: pointer !important;
+}
+
+.income-card .form-group input:focus,
+.income-card .form-group select:focus {
+  outline: none !important;
+  border-color: #27ae60 !important;
+}
+
+.income-card .form-group input::placeholder {
+  color: #999;
+}
+
+/* Income Button */
+.income-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  color: white;
+  background: #27ae60;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+}
+
+.income-btn:hover:not(:disabled) {
+  background: #229954;
+}
+
+.income-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Responsive - Mobile */
+@media (max-width: 767px) {
+  .income-card {
+    padding: 16px;
+  }
+  
+  .income-card h4 {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .income-card .form-group {
+    margin-bottom: 12px;
+  }
+  
+  .income-card .form-group label {
+    font-size: 11px;
+  }
+}
 }
