@@ -85,38 +85,36 @@
         <input type="text" placeholder="e.g. Ink or Printer Issues " [(ngModel)]="expenseReason" required />
       </div>
       <button class="expense-btn" (click)="addExpense()">Add Expense</button>
-<div class="income-card">
-      <h4>Quick Add Income</h4>
 
-      <div class="form-group">
-        <label>Service Type</label>
-        <select [(ngModel)]="incomeServiceType">
-          <option value="">Select Service</option>
-          <option value="Photo Only">Photo Only</option>
-          <option value="Print Only">Print Only</option>
-          <option value="Photo and Print">Photo and Print</option>
-        </select>
+      <div class="income-card">
+        <h4>Quick Add Income</h4>
+
+        <div class="form-group">
+          <label>Service Type</label>
+          <select class="service-select" [(ngModel)]="incomeServiceType">
+            <option value="">Select Service</option>
+            <option value="Photo Only">Photo Only</option>
+            <option value="Print Only">Print Only</option>
+            <option value="Photo and Print">Photo and Print</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Amount (₹)</label>
+          <input type="number" placeholder="0" [(ngModel)]="incomeAmount" min="0" />
+        </div>
+
+        <div class="form-group">
+          <label>Client Name (Optional)</label>
+          <input type="text" placeholder="Walk-in Customer" readonly [(ngModel)]="incomeClientName" />
+        </div>
+
+        <button class="expense-btn" (click)="addQuickIncome()"
+          [disabled]="!incomeServiceType || !incomeAmount || incomeAmount <= 0">
+          Add Income
+        </button>
       </div>
-
-      <div class="form-group">
-        <label>Amount (₹)</label>
-        <input type="number" placeholder="0" [(ngModel)]="incomeAmount" min="0" />
-      </div>
-
-      <div class="form-group">
-        <label>Client Name (Optional)</label>
-        <input type="text" placeholder="Walk-in Customer" readonly [(ngModel)]="incomeClientName" />
-      </div>
-
-      <button 
-        class="expense-btn" 
-        (click)="addQuickIncome()" 
-        [disabled]="!incomeServiceType || !incomeAmount || incomeAmount <= 0"
-      >
-        Add Income
-      </button>
     </div>
 
   </div>
-
 </div>
