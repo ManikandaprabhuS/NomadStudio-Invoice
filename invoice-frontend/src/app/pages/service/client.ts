@@ -30,10 +30,6 @@ export class Client {
     return headers;
   }
 
-  createClient(client: any): Observable<any> {
-    return this.http.post(this.apiUrl, client, { headers: this.getHeaders() });
-  }
-
   getAllClients(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() });
   }

@@ -2,7 +2,6 @@ const router = require('express').Router();
 const auth = require('../middleware/auth.middleware');
 const userCtrl = require('../controllers/user.controller');
 
-router.post('/users', auth, userCtrl.createUser);
 router.get('/users', auth, userCtrl.getUsers);
 router.get('/users/:id', auth, userCtrl.getUserById);
 router.put('/users/:id', auth, userCtrl.updateUser);

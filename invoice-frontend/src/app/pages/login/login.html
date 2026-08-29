@@ -9,11 +9,26 @@
     <!-- Login View -->
     <div *ngIf="mode === 'login'">
       <div class="input-group">
-        <input type="password" placeholder="Password" [(ngModel)]="password" [class.error]="showError && !password" />
+        <input
+          type="text"
+          placeholder="Username"
+          [(ngModel)]="userName"
+          [class.error]="showError && !userName"
+          autocomplete="username"
+        />
+      </div>
+      <div class="input-group">
+        <input
+          type="password"
+          placeholder="Password"
+          [(ngModel)]="password"
+          [class.error]="showError && !password"
+          autocomplete="current-password"
+        />
       </div>
 
       <div class="error-message" *ngIf="showError">
-        Password is required
+        Username and password are required
       </div>
 
       <button (click)="login()">Login</button>
