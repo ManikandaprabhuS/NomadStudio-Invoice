@@ -1,10 +1,6 @@
 <div class="invoice-list-container">
   <div class="header-section">
     <h2 class="page-title">Invoices</h2>
-    <div class="search-box">
-      <input class="invoice-search" placeholder="Search business invoices..." [(ngModel)]="searchTerm"
-        (ngModelChange)="applyFilter()" />
-    </div>
   </div>
 
   <div class="invoice-sections">
@@ -14,10 +10,31 @@
           <h3>Customer Invoice Table</h3>
           <p>Quick Add Income walk-in and customer entries</p>
         </div>
-        <button class="section-export-btn" type="button" (click)="exportCustomerCsv()">Export CSV</button>
+        <div class="section-actions">
+          <button class="filter-toggle-btn" type="button" (click)="showCustomerFilters = !showCustomerFilters">
+            Filter
+          </button>
+          <button class="section-export-btn" type="button" (click)="generateCustomerReport()">Generate Report</button>
+        </div>
       </div>
 
-      <div class="table-container" *ngIf="customerInvoices.length; else noCustomerInvoices">
+      <div class="customer-filter-panel" *ngIf="showCustomerFilters">
+        <label>
+          <span>Mode of Payment</span>
+          <select [(ngModel)]="customerPaymentFilter" (ngModelChange)="applyCustomerFilter()">
+            <option value="">All Payments</option>
+            <option value="Online">Online</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </label>
+        <label>
+          <span>Date</span>
+          <input type="date" [(ngModel)]="customerDateFilter" (ngModelChange)="applyCustomerFilter()" />
+        </label>
+        <button class="clear-filter-btn" type="button" (click)="clearCustomerFilters()">Clear Filters</button>
+      </div>
+
+      <div class="table-container" *ngIf="filteredCustomerInvoices.length; else noCustomerInvoices">
         <table class="invoice-table customer-invoice-table">
           <thead>
             <tr>
@@ -31,7 +48,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="invoice-row" *ngFor="let invoice of customerInvoices">
+            <tr class="invoice-row" *ngFor="let invoice of filteredCustomerInvoices">
               <td data-label="ID">{{ invoice._id | slice:-5 }}</td>
               <td data-label="Customer"><span class="client-name">{{ invoice.clientName }}</span></td>
               <td data-label="Service">{{ invoice.serviceType }}</td>
@@ -59,7 +76,12 @@
           <h3>Business Invoice Table</h3>
           <p>Invoices created from the business invoice form</p>
         </div>
-        <button class="section-export-btn" type="button" (click)="exportBusinessCsv()">Export CSV</button>
+        <div class="section-actions">
+          <input class="table-filter business-table-filter" placeholder="Search with Client Name or Phone Number."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="applyFilter()" />
+          <button class="section-export-btn" type="button" (click)="generateBusinessReport()">Generate Report</button>
+        </div>
       </div>
 
       <div class="table-container" *ngIf="filteredInvoices.length; else noBusinessInvoices">
@@ -91,16 +113,16 @@
               <td data-label="Total">
                 <span class="amount-cell" *ngIf="editingInvoice?._id !== inv._id">₹ {{ inv.totalAmount | number }}</span>
                 <input class="edit-input" type="number" *ngIf="editingInvoice?._id === inv._id"
-                  [(ngModel)]="editingInvoice.totalAmount" />
+                  [(ngModel)]="editingInvoice.totalAmount" (ngModelChange)="updateEditingBalance()" />
               </td>
               <td data-label="Received">
                 <span class="amount-cell" *ngIf="editingInvoice?._id !== inv._id">₹ {{ inv.receivedAmount | number }}</span>
                 <input class="edit-input" type="number" *ngIf="editingInvoice?._id === inv._id"
-                  [(ngModel)]="editingInvoice.receivedAmount" />
+                  [(ngModel)]="editingInvoice.receivedAmount" (ngModelChange)="updateEditingBalance()" />
               </td>
               <td data-label="Balance">
-                <span class="amount-cell" [style.color]="inv.balanceAmount > 0 ? 'var(--accent-amber)' : 'inherit'">
-                  ₹ {{ inv.balanceAmount | number }}
+                <span class="amount-cell" [style.color]="getDisplayedBalance(inv) > 0 ? 'var(--accent-amber)' : 'inherit'">
+                  ₹ {{ getDisplayedBalance(inv) | number }}
                 </span>
               </td>
               <td data-label="Date"><span class="date-cell">{{ inv.createdAt | date:'dd MMM yyyy' }}</span></td>

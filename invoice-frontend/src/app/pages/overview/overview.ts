@@ -11,6 +11,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { AlertService } from '../service/alert.service';
 import { ServiceCatalog, ServiceType } from '../service/service-catalog';
 import { PaymentMode, QuickAddIncomeRecord, QuickAddIncomeService } from '../service/quick-add-income';
+import { jsPDF } from 'jspdf';
 
 
 @Component({
@@ -20,8 +21,6 @@ import { PaymentMode, QuickAddIncomeRecord, QuickAddIncomeService } from '../ser
   styleUrl: './overview.css',
 })
 export class Overview implements OnInit {
-
-  readonly today = new Date();
 
   // ================= EXISTING =================
   totalClients = 0;
@@ -468,27 +467,107 @@ export class Overview implements OnInit {
           return;
         }
 
-        setTimeout(() => this.downloadQuickIncomePdf(), 0);
+        this.downloadQuickIncomePdf(records);
       },
       error: () => this.alertService.error('Failed to generate Quick Add Income report')
     });
   }
 
-  private async downloadQuickIncomePdf(): Promise<void> {
-    const element = document.getElementById('quick-income-pdf-report');
-    if (!element) {
-      this.alertService.error('Quick Add Income report could not be prepared');
-      return;
-    }
+  private downloadQuickIncomePdf(records: QuickAddIncomeRecord[]): void {
+    try {
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 12;
+      const columns = [
+        { label: 'Customer', width: 60 },
+        { label: 'Service', width: 64 },
+        { label: 'Amount', width: 38 },
+        { label: 'Payment Mode', width: 48 },
+        { label: 'Date', width: pageWidth - (margin * 2) - 210 }
+      ];
+      const lineHeight = 5;
+      let rowY = 34;
 
-    const html2pdf = (await import('html2pdf.js')).default;
-    await html2pdf().set({
-      margin: 10,
-      filename: `Quick-Add-Income-${new Date().toISOString().slice(0, 10)}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    } as any).from(element).save();
+      const drawPageHeader = (): void => {
+        pdf.setTextColor(54, 36, 24);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(16);
+        pdf.text('Quick Add Income Report', margin, 15);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor(90, 90, 90);
+        pdf.text(`Generated on ${new Date().toLocaleDateString('en-GB')}`, margin, 21);
+
+        pdf.setFillColor(151, 99, 61);
+        pdf.rect(margin, 26, pageWidth - (margin * 2), 8, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        let x = margin;
+        columns.forEach(column => {
+          pdf.text(column.label, x + 2, 31.5);
+          x += column.width;
+        });
+        rowY = 34;
+      };
+
+      drawPageHeader();
+
+      records.forEach((record, index) => {
+        const values = [
+          record.clientName || 'Walk-in Customer',
+          record.serviceType || '-',
+          `INR ${Number(record.amount || 0).toFixed(2)}`,
+          record.modeOfPayment || '-',
+          record.createdAt ? new Date(record.createdAt).toLocaleDateString('en-GB') : '-'
+        ];
+        const lines = values.map((value, columnIndex) =>
+          pdf.splitTextToSize(String(value), columns[columnIndex].width - 4) as string[]
+        );
+        const rowHeight = Math.max(9, Math.max(...lines.map(cell => cell.length)) * lineHeight + 4);
+
+        if (rowY + rowHeight > pageHeight - 14) {
+          pdf.addPage();
+          drawPageHeader();
+        }
+
+        pdf.setFillColor(index % 2 === 0 ? 249 : 255, index % 2 === 0 ? 246 : 255, index % 2 === 0 ? 243 : 255);
+        pdf.rect(margin, rowY, pageWidth - (margin * 2), rowHeight, 'F');
+        pdf.setDrawColor(220, 210, 202);
+        pdf.rect(margin, rowY, pageWidth - (margin * 2), rowHeight);
+        pdf.setTextColor(35, 35, 35);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        let x = margin;
+        lines.forEach((cellLines, columnIndex) => {
+          pdf.text(cellLines, x + 2, rowY + 6);
+          x += columns[columnIndex].width;
+        });
+        rowY += rowHeight;
+      });
+
+      const pageCount = pdf.getNumberOfPages();
+      for (let page = 1; page <= pageCount; page++) {
+        pdf.setPage(page);
+        pdf.setFontSize(8);
+        pdf.setTextColor(110, 110, 110);
+        pdf.text(`Page ${page} of ${pageCount}`, pageWidth - margin, pageHeight - 6, { align: 'right' });
+      }
+
+      const generatedAt = new Date();
+      const pdfBlob = pdf.output('blob');
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = downloadUrl;
+      downloadLink.download = `Quick-Add-Income-${generatedAt.toISOString().replace(/[:.]/g, '-')}.pdf`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+    } catch {
+      this.alertService.error('Failed to generate Quick Add Income report');
+    }
   }
 
   resetIncomeForm() {

@@ -141,30 +141,6 @@
           Add Income
         </button>
 
-        <div id="quick-income-pdf-report" class="quick-income-pdf-source">
-          <h2>Quick Add Income Report</h2>
-          <p>Generated on {{ today | date:'dd MMM yyyy' }}</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Service</th>
-                <th>Amount</th>
-                <th>Payment Mode</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let income of quickAddIncomeRecords">
-                <td>{{ income.clientName }}</td>
-                <td>{{ income.serviceType }}</td>
-                <td>₹ {{ income.amount | number:'1.0-2' }}</td>
-                <td>{{ income.modeOfPayment }}</td>
-                <td>{{ income.createdAt | date:'dd MMM yyyy' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
 

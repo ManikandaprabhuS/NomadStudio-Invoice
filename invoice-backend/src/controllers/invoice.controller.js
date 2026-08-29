@@ -1,10 +1,28 @@
 const Invoice = require('../models/Invoice');
 
+const calculateInvoiceAmounts = invoice => {
+  if (invoice.services && invoice.services.length > 0) {
+    invoice.totalAmount = invoice.services.reduce(
+      (sum, service) => sum + Number(service.amountCharged || 0),
+      0
+    );
+  }
+
+  const totalAmount = Number(invoice.totalAmount);
+  const receivedAmount = Number(invoice.receivedAmount);
+  if (Number.isFinite(totalAmount)) invoice.totalAmount = totalAmount;
+  if (Number.isFinite(receivedAmount)) invoice.receivedAmount = receivedAmount;
+  if (Number.isFinite(totalAmount) && Number.isFinite(receivedAmount)) {
+    invoice.balanceAmount = totalAmount - receivedAmount;
+  }
+  return invoice;
+};
+
 // CREATE
 exports.createInvoice = async (req, res) => {
   try {
     console.log('[CREATE INVOICE] Payload:', req.body); // ✅ log input
-    const invoice = req.body;
+    const invoice = calculateInvoiceAmounts({ ...req.body });
 
     // minimal validation
     if (!invoice.services || invoice.services.length === 0) {
@@ -26,8 +44,8 @@ exports.createInvoice = async (req, res) => {
 exports.getInvoices = async (req, res) => {
   try {
     console.log('[GET INVOICES] Payload:', req.body); // ✅ log input
-    const invoices = await Invoice.find().sort({ createdAt: -1 });
-    res.json(invoices);
+    const invoices = await Invoice.find().sort({ createdAt: -1 }).lean();
+    res.json(invoices.map(calculateInvoiceAmounts));
   } catch (err) {
     console.error(err);
     console.log('[GET INVOICES] Error Fetching Invoices :', err); // ✅ log error
@@ -39,12 +57,12 @@ exports.getInvoices = async (req, res) => {
 exports.getInvoiceById = async (req, res) => {
   try {
     console.log('[GET INVOICE BY ID] Payload:', req.params.id); // ✅ log input
-    const invoice = await Invoice.findById(req.params.id);
+    const invoice = await Invoice.findById(req.params.id).lean();
     if (!invoice) {
       console.warn('[GET INVOICE BY ID] Invoice Not Found:', req.params.id); // ✅ log error
       return res.status(404).json({ message: 'Invoice not found' });
     }
-    res.json(invoice);
+    res.json(calculateInvoiceAmounts(invoice));
   } catch (err) {
     console.error(err);
     console.log('[GET INVOICE BY ID] Error Fetching Invoice :', err); // ✅ log error
@@ -56,24 +74,22 @@ exports.getInvoiceById = async (req, res) => {
 exports.updateInvoice = async (req, res) => {
   try {
     console.log('[UPDATE INVOICE] Payload:', req.params.id, req.body); // ✅ log input
-    // Auto-calculate totalAmount from services
-    if (req.body.services && req.body.services.length > 0) {
-      req.body.totalAmount = req.body.services.reduce(
-        (sum, service) => sum + (service.amountCharged || 0), 
-        0
-      );
+    const currentInvoice = await Invoice.findById(req.params.id).lean();
+    if (!currentInvoice) {
+      console.warn('[UPDATE INVOICE] Invoice Not Found:', req.params.id); // ✅ log error
+      return res.status(404).json({ message: 'Invoice not found' });
     }
+
+    const recalculatedInvoice = calculateInvoiceAmounts({ ...currentInvoice, ...req.body });
+    req.body.totalAmount = recalculatedInvoice.totalAmount;
+    req.body.receivedAmount = recalculatedInvoice.receivedAmount;
+    req.body.balanceAmount = recalculatedInvoice.balanceAmount;
     
     const invoice = await Invoice.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-    
-    if (!invoice) {
-      console.warn('[UPDATE INVOICE] Invoice Not Found:', req.params.id); // ✅ log error
-      return res.status(404).json({ message: 'Invoice not found' });
-    }
     
     res.json(invoice);
   } catch (err) {

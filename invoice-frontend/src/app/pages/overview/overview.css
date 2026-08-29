@@ -617,42 +617,6 @@
   cursor: not-allowed;
 }
 
-.quick-income-pdf-source {
-  position: fixed;
-  left: -10000px;
-  top: 0;
-  width: 1000px;
-  padding: 32px;
-  background: #fff;
-  color: #111;
-}
-
-.quick-income-pdf-source h2 {
-  margin: 0 0 6px;
-}
-
-.quick-income-pdf-source p {
-  margin: 0 0 20px;
-  color: #555;
-}
-
-.quick-income-pdf-source table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.quick-income-pdf-source th,
-.quick-income-pdf-source td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: left;
-  font-size: 12px;
-}
-
-.quick-income-pdf-source th {
-  background: #f3eee9;
-}
-
 @media (max-width: 900px) {
   .quick-income-grid {
     grid-template-columns: 1fr;
