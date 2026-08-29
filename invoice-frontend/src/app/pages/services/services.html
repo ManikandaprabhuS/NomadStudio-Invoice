@@ -1,0 +1,53 @@
+<div class="services-container">
+  <div class="header-section">
+    <div>
+      <h2>Services</h2>
+      <p>Manage the service types available across the app.</p>
+    </div>
+  </div>
+
+  <form class="add-service-card" (ngSubmit)="addService()">
+    <label for="serviceName">Service name</label>
+    <div class="add-service-row">
+      <input id="serviceName" name="serviceName" type="text" [(ngModel)]="serviceName"
+        placeholder="Enter service name" required />
+      <button type="submit" [disabled]="!serviceName.trim() || saving">Add Service</button>
+    </div>
+  </form>
+
+  <div *ngIf="loading" class="state-message">Loading services...</div>
+
+  <div class="table-card" *ngIf="!loading && services.length">
+    <table>
+      <thead>
+        <tr>
+          <th>Service Name</th>
+          <th class="actions-heading">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let service of services">
+          <td data-label="Service Name">
+            <span *ngIf="editingService?._id !== service._id">{{ service.name }}</span>
+            <input *ngIf="editingService?._id === service._id" [(ngModel)]="editingService!.name"
+              [ngModelOptions]="{standalone: true}" />
+          </td>
+          <td data-label="Actions">
+            <div class="action-buttons">
+              <button type="button" class="secondary" *ngIf="editingService?._id !== service._id"
+                (click)="editService(service)">Edit</button>
+              <button type="button" class="save" *ngIf="editingService?._id === service._id"
+                [disabled]="!editingService!.name.trim() || saving" (click)="saveEdit()">Save</button>
+              <button type="button" class="secondary" *ngIf="editingService?._id === service._id"
+                (click)="cancelEdit()">Cancel</button>
+              <button type="button" class="delete" *ngIf="editingService?._id !== service._id"
+                (click)="deleteService(service)">Delete</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!loading && !services.length" class="state-message">No services added yet.</div>
+</div>

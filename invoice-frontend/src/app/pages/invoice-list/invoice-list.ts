@@ -5,6 +5,7 @@ import { Invoice } from '../service/invoice';
 
 import { InvoiceTemplateComponent } from '../../shared/components/invoice-template/invoice-template.component';
 import { AlertService } from '../service/alert.service';
+import { QuickAddIncomeRecord, QuickAddIncomeService } from '../service/quick-add-income';
 
 @Component({
   selector: 'app-invoice-list',
@@ -18,9 +19,12 @@ export class InvoiceList implements OnInit {
   invoices: any[] = [];
   filteredInvoices: any[] = [];
   paginatedInvoices: any[] = [];
+  customerInvoices: QuickAddIncomeRecord[] = [];
 
   selectedInvoice: any = null;
   showPreview = false;
+  selectedCustomerInvoice: QuickAddIncomeRecord | null = null;
+  showCustomerPreview = false;
 
   searchTerm = '';
   selectedCount = 0;
@@ -30,10 +34,22 @@ export class InvoiceList implements OnInit {
   currentPage = 1;
   totalPages = 1;
 
-  constructor(private invoiceService: Invoice, private alertService: AlertService) { }
+  constructor(
+    private invoiceService: Invoice,
+    private quickAddIncomeService: QuickAddIncomeService,
+    private alertService: AlertService
+  ) { }
 
   ngOnInit(): void {
     this.loadInvoices();
+    this.loadCustomerInvoices();
+  }
+
+  loadCustomerInvoices() {
+    this.quickAddIncomeService.getIncomes().subscribe({
+      next: records => this.customerInvoices = records,
+      error: () => this.alertService.error('Failed to load customer invoices')
+    });
   }
 
   loadInvoices() {
@@ -104,6 +120,21 @@ export class InvoiceList implements OnInit {
 
   closePreview() {
     this.showPreview = false;
+  }
+
+  viewBusinessInvoice(invoice: any) {
+    this.selectedInvoice = invoice;
+    this.showPreview = true;
+  }
+
+  viewCustomerInvoice(invoice: QuickAddIncomeRecord) {
+    this.selectedCustomerInvoice = invoice;
+    this.showCustomerPreview = true;
+  }
+
+  closeCustomerPreview() {
+    this.showCustomerPreview = false;
+    this.selectedCustomerInvoice = null;
   }
 
   /* ---------- PDF DOWNLOAD (FIXED FOR COMPLETE CONTENT) ---------- */
@@ -203,6 +234,75 @@ export class InvoiceList implements OnInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  exportCustomerCsv() {
+    if (!this.customerInvoices.length) {
+      this.alertService.error('No customer invoices to export');
+      return;
+    }
+
+    const rows = this.customerInvoices.map(income => [
+      income._id,
+      income.clientName,
+      income.serviceType,
+      income.amount,
+      income.modeOfPayment,
+      this.formatCsvDate(income.createdAt)
+    ]);
+
+    this.downloadCsv(
+      'customer_invoices.csv',
+      ['ID', 'Customer Name', 'Service Type', 'Amount', 'Payment Mode', 'Date'],
+      rows
+    );
+  }
+
+  exportBusinessCsv() {
+    if (!this.filteredInvoices.length) {
+      this.alertService.error('No business invoices to export');
+      return;
+    }
+
+    const rows = this.filteredInvoices.map(inv => [
+      inv._id,
+      inv.userName,
+      inv.phoneNumber,
+      (inv.services || []).map((service: any) => service.serviceType).join('; '),
+      inv.totalAmount,
+      inv.receivedAmount,
+      inv.balanceAmount,
+      this.formatCsvDate(inv.createdAt)
+    ]);
+
+    this.downloadCsv(
+      'business_invoices.csv',
+      ['ID', 'Client Name', 'Phone', 'Services', 'Total Amount', 'Received Amount', 'Balance Amount', 'Date'],
+      rows
+    );
+  }
+
+  private formatCsvDate(value: string): string {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10);
+  }
+
+  private downloadCsv(filename: string, headers: string[], rows: any[][]) {
+    const escapeValue = (value: any) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    const csvContent = [
+      headers.map(escapeValue).join(','),
+      ...rows.map(row => row.map(escapeValue).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   /* ---------- EDIT / DELETE ---------- */

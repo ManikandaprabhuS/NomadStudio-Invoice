@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Invoice } from '../service/invoice';
 import { CommonModule } from '@angular/common';
 import { AlertService } from '../service/alert.service';
+import { ServiceCatalog, ServiceType } from '../service/service-catalog';
 
 @Component({
   selector: 'app-create-invoice',
@@ -12,7 +13,9 @@ import { AlertService } from '../service/alert.service';
   templateUrl: './create-invoice.html',
   styleUrl: './create-invoice.css',
 })
-export class CreateInvoice {
+export class CreateInvoice implements OnInit {
+
+  serviceTypes: ServiceType[] = [];
 
   invoice = {
     userName: '',
@@ -41,8 +44,16 @@ export class CreateInvoice {
   constructor(
     private invoiceService: Invoice,
     private router: Router,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private serviceCatalog: ServiceCatalog
   ) { }
+
+  ngOnInit(): void {
+    this.serviceCatalog.getServices().subscribe({
+      next: services => this.serviceTypes = services,
+      error: () => this.alertService.error('Failed to load services')
+    });
+  }
 
   addService() {
     this.invoice.services.push({

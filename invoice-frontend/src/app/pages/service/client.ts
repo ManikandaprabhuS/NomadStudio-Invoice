@@ -2,13 +2,14 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Client {
 
-  private apiUrl = 'http://localhost:5000/api/users';
+  private apiUrl = `${environment.apiBaseUrl}/api/users`;
   private platformId = inject(PLATFORM_ID);
 
   constructor(private http: HttpClient) { }

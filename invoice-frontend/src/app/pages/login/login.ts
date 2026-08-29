@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -11,6 +12,7 @@ import { Router } from '@angular/router';
   styleUrl: './login.css',
 })
 export class Login {
+  private authUrl = `${environment.apiBaseUrl}/auth`;
   userName = 'NomadStudio';
   password = '';
   emailId = '';
@@ -28,7 +30,7 @@ export class Login {
       return;
     }
     console.log('Logging in with', this.userName, this.password);
-    this.http.post<any>('http://localhost:5000/auth/login', {
+    this.http.post<any>(`${this.authUrl}/login`, {
       userName: this.userName,
       password: this.password
 
@@ -49,7 +51,7 @@ export class Login {
       alert('Please enter your email address');
       return;
     }
-    this.http.post<any>('http://localhost:5000/auth/forgot-password', {
+    this.http.post<any>(`${this.authUrl}/forgot-password`, {
       emailId: this.emailId
     }).subscribe({
       next: (res) => {
@@ -67,7 +69,7 @@ export class Login {
       alert('Please fill in all fields');
       return;
     }
-    this.http.post<any>('http://localhost:5000/auth/reset-password', {
+    this.http.post<any>(`${this.authUrl}/reset-password`, {
       emailId: this.emailId,
       otp: this.otp,
       newPassword: this.newPassword

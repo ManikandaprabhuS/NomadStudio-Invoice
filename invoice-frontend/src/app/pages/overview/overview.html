@@ -87,32 +87,84 @@
       <button class="expense-btn" (click)="addExpense()">Add Expense</button>
 
       <div class="income-card">
-        <h4>Quick Add Income</h4>
-
-        <div class="form-group">
-          <label>Service Type</label>
-          <select class="service-select" [(ngModel)]="incomeServiceType">
-            <option value="">Select Service</option>
-            <option value="Photo Only">Photo Only</option>
-            <option value="Print Only">Print Only</option>
-            <option value="Photo and Print">Photo and Print</option>
-          </select>
+        <div class="income-card-header">
+          <div>
+            <span class="income-eyebrow">Income Entry</span>
+            <h4>Quick Add Income</h4>
+            <p>Record a payment without creating an invoice.</p>
+          </div>
+          <button type="button" class="report-btn" (click)="generateQuickIncomeReport()">
+            Generate Report
+          </button>
         </div>
 
-        <div class="form-group">
-          <label>Amount (₹)</label>
-          <input type="number" placeholder="0" [(ngModel)]="incomeAmount" min="0" />
+        <div class="quick-income-grid">
+          <div class="form-group">
+            <label>Service Type</label>
+            <select class="service-select" [(ngModel)]="incomeServiceType">
+              <option value="">Select Service</option>
+              <option *ngFor="let serviceType of serviceTypes" [value]="serviceType.name">
+                {{ serviceType.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Client Name <span>(Optional)</span></label>
+            <input type="text" placeholder="Walk-in Customer" [(ngModel)]="incomeClientName" />
+          </div>
+
+          <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" placeholder="0.00" [(ngModel)]="incomeAmount" min="0" />
+          </div>
+
+          <div class="form-group payment-group">
+            <label>Mode of Payment</label>
+            <div class="payment-checkboxes">
+              <label class="payment-checkbox">
+                <input type="checkbox" name="incomePaymentOnline" [checked]="incomePaymentMode === 'Online'"
+                  (change)="selectPaymentMode('Online', $event)" />
+                Online
+              </label>
+              <label class="payment-checkbox">
+                <input type="checkbox" name="incomePaymentCash" [checked]="incomePaymentMode === 'Cash'"
+                  (change)="selectPaymentMode('Cash', $event)" />
+                Cash
+              </label>
+            </div>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label>Client Name (Optional)</label>
-          <input type="text" placeholder="Walk-in Customer" readonly [(ngModel)]="incomeClientName" />
-        </div>
-
-        <button class="expense-btn" (click)="addQuickIncome()"
-          [disabled]="!incomeServiceType || !incomeAmount || incomeAmount <= 0">
+        <button class="income-submit-btn" (click)="addQuickIncome()"
+          [disabled]="!incomeServiceType || !incomeAmount || incomeAmount <= 0 || !incomePaymentMode">
           Add Income
         </button>
+
+        <div id="quick-income-pdf-report" class="quick-income-pdf-source">
+          <h2>Quick Add Income Report</h2>
+          <p>Generated on {{ today | date:'dd MMM yyyy' }}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Service</th>
+                <th>Amount</th>
+                <th>Payment Mode</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let income of quickAddIncomeRecords">
+                <td>{{ income.clientName }}</td>
+                <td>{{ income.serviceType }}</td>
+                <td>₹ {{ income.amount | number:'1.0-2' }}</td>
+                <td>{{ income.modeOfPayment }}</td>
+                <td>{{ income.createdAt | date:'dd MMM yyyy' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 

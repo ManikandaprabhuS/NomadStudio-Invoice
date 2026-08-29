@@ -9,6 +9,8 @@ import { Expense } from '../service/expense';
 import { Chart, ChartConfiguration, registerables } from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { AlertService } from '../service/alert.service';
+import { ServiceCatalog, ServiceType } from '../service/service-catalog';
+import { PaymentMode, QuickAddIncomeRecord, QuickAddIncomeService } from '../service/quick-add-income';
 
 
 @Component({
@@ -18,6 +20,8 @@ import { AlertService } from '../service/alert.service';
   styleUrl: './overview.css',
 })
 export class Overview implements OnInit {
+
+  readonly today = new Date();
 
   // ================= EXISTING =================
   totalClients = 0;
@@ -33,6 +37,9 @@ export class Overview implements OnInit {
   incomeServiceType: string = '';
   incomeAmount: number = 0;
   incomeClientName: string = 'Walk-in Customer';
+  incomePaymentMode: PaymentMode | '' = '';
+  serviceTypes: ServiceType[] = [];
+  quickAddIncomeRecords: QuickAddIncomeRecord[] = [];
 
   @ViewChild('incomeChart') incomeChartRef!: ElementRef<HTMLCanvasElement>;
   chart: Chart | null = null;
@@ -43,7 +50,9 @@ export class Overview implements OnInit {
     private clientService: Client,
     private expenseService: Expense,
     private cdr: ChangeDetectorRef,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private serviceCatalog: ServiceCatalog,
+    private quickAddIncomeService: QuickAddIncomeService
   ) { }
 
   // ================= NEW (FILTER SUPPORT) =================
@@ -59,7 +68,15 @@ export class Overview implements OnInit {
 
   // ================= LIFECYCLE =================
   ngOnInit(): void {
+    this.loadServices();
     this.loadDashboardData();
+  }
+
+  loadServices(): void {
+    this.serviceCatalog.getServices().subscribe({
+      next: services => this.serviceTypes = services,
+      error: () => this.alertService.error('Failed to load services')
+    });
   }
 
 
@@ -73,12 +90,24 @@ export class Overview implements OnInit {
       const expense: any[] = await firstValueFrom(
         this.expenseService.getExpenses()
       );
+      const quickAddIncomes: QuickAddIncomeRecord[] = await firstValueFrom(
+        this.quickAddIncomeService.getIncomes()
+      );
+      this.quickAddIncomeRecords = quickAddIncomes;
       this.allExpenses = expense;
 
       // Invoices (Promise)
       const invoices: any[] = await this.invoiceService.getInvoices();
 
-      this.allInvoices = invoices; // backup
+      this.allInvoices = [
+        ...invoices,
+        ...quickAddIncomes.map(income => ({
+          ...income,
+          totalAmount: income.amount,
+          receivedAmount: income.amount,
+          balanceAmount: 0
+        }))
+      ]; // dashboard income sources
       this.allClients = clients;   // backup
       this.totalClients=clients.length;
 
@@ -401,55 +430,71 @@ export class Overview implements OnInit {
   }
 
   addQuickIncome(){
-    if (!this.incomeServiceType || !this.incomeAmount || this.incomeAmount <= 0) {
+    if (!this.incomeServiceType || !this.incomeAmount || this.incomeAmount <= 0 || !this.incomePaymentMode) {
       this.alertService.error('Please fill all required fields');
       return;
     }
 
-    // Create invoice object matching YOUR EXACT schema
-  const quickInvoice = {
-    userName: this.incomeClientName || 'Walk-in Customer',
-    phoneNumber: '0000000000',
-    services: [
-      {
-        serviceType: this.incomeServiceType,
-        quantity: 1,
-        pricePerUnit: this.incomeAmount,        // ✅ Changed from 'price'
-        amountCharged: this.incomeAmount,       // ✅ Added this field
-        notes: 'Quick income entry'
-      }
-    ],
-    totalAmount: this.incomeAmount,
-    receivedAmount: this.incomeAmount,
-    balanceAmount: 0,
-    ownerDetails: {                              // ✅ Added owner details
-      companyName: "Nomad Studio Pvt Ltd",
-      ownerName: "Suriya",
-      phoneNumber: "+91 1234567890",
-      address: "Dharapuram Road, Oddanchatram-624619, Tamil Nadu"
-    }
-  };
-    console.log('💰 Adding quick income:', quickInvoice);
-      this.invoiceService.createInvoice(quickInvoice)
-      .then((response) => {
-        console.log('✅ Income added:', response);
+    this.quickAddIncomeService.createIncome({
+      serviceType: this.incomeServiceType,
+      clientName: this.incomeClientName.trim() || 'Walk-in Customer',
+      amount: this.incomeAmount,
+      modeOfPayment: this.incomePaymentMode
+    }).subscribe({
+      next: () => {
         this.alertService.success('Income added successfully!');
-        
-        // Reset form
         this.resetIncomeForm();
-        
-        // Reload invoices to show updated data
         this.loadDashboardData();
-      })
-      .catch((err) => {
-        console.error('❌ Failed to add income:', err);
+      },
+      error: (err) => {
+        console.error('Failed to add income:', err);
         this.alertService.error('Failed to add income');
-      });
+      }
+    });
 
     }
+
+  selectPaymentMode(mode: PaymentMode, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.incomePaymentMode = checked ? mode : '';
+  }
+
+  generateQuickIncomeReport(): void {
+    this.quickAddIncomeService.getIncomes().subscribe({
+      next: records => {
+        this.quickAddIncomeRecords = records;
+        if (!records.length) {
+          this.alertService.error('No Quick Add Income entries available to export');
+          return;
+        }
+
+        setTimeout(() => this.downloadQuickIncomePdf(), 0);
+      },
+      error: () => this.alertService.error('Failed to generate Quick Add Income report')
+    });
+  }
+
+  private async downloadQuickIncomePdf(): Promise<void> {
+    const element = document.getElementById('quick-income-pdf-report');
+    if (!element) {
+      this.alertService.error('Quick Add Income report could not be prepared');
+      return;
+    }
+
+    const html2pdf = (await import('html2pdf.js')).default;
+    await html2pdf().set({
+      margin: 10,
+      filename: `Quick-Add-Income-${new Date().toISOString().slice(0, 10)}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    } as any).from(element).save();
+  }
+
   resetIncomeForm() {
     this.incomeServiceType = '';
     this.incomeAmount = 0;
     this.incomeClientName = 'Walk-in Customer';
+    this.incomePaymentMode = '';
   }
 }

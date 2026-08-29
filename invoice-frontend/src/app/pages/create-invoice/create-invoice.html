@@ -75,14 +75,9 @@
             <td data-label="Service Type">
               <select class="service-select" [(ngModel)]="service.serviceType" required>
                 <option value="" disabled>Select Service</option>
-                <option>Wedding Photography</option>
-                <option>Videography</option>
-                <option>Drone Shots</option>
-                <option>Photo and Print</option>
-                <option>Print only</option>
-                <option>Album Design</option>
-                <option>Frame Order</option>
-                <option>Pre-Wedding Shoot</option>
+                <option *ngFor="let serviceType of serviceTypes" [value]="serviceType.name">
+                  {{ serviceType.name }}
+                </option>
               </select>
             </td>
             <td data-label="Qty">

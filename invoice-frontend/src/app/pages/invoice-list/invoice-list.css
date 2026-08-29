@@ -661,3 +661,146 @@
     display: none !important;
   }
 }
+
+/* ================= SPLIT INVOICE TABLES ================= */
+.invoice-list-container {
+  overflow-y: auto;
+}
+
+.invoice-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 4px 24px 0;
+}
+
+.invoice-section-card {
+  padding: 20px;
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  background: var(--card-white);
+  box-shadow: var(--card-shadow);
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.section-heading h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.section-heading p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.section-export-btn,
+.btn-view {
+  padding: 8px 13px;
+  border: 1px solid var(--primary-brown);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--primary-brown);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.section-export-btn:hover,
+.btn-view:hover {
+  background: #fdf6f0;
+}
+
+.invoice-section-card .table-container {
+  margin: 0;
+  flex: none;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 0;
+}
+
+.invoice-section-card .invoice-table {
+  min-width: 850px;
+}
+
+.customer-invoice-table {
+  min-width: 720px !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+.payment-pill {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #f4ebe4;
+  color: var(--primary-brown);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.empty-table {
+  padding: 28px;
+  border: 1px dashed var(--border-light);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  text-align: center;
+  background: #fafafa;
+}
+
+.customer-preview-modal {
+  width: 620px;
+}
+
+.customer-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.customer-detail-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.customer-detail-grid span {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.customer-detail-grid strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .section-export-btn {
+    width: 100%;
+  }
+
+  .customer-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

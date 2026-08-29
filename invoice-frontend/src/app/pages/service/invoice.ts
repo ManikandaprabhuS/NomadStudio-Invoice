@@ -1,12 +1,13 @@
 import { isPlatformBrowser } from '@angular/common';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Invoice {
 
-  private apiUrl = 'http://localhost:5000/api/invoices';
+  private apiUrl = `${environment.apiBaseUrl}/api/invoices`;
   private platformId = inject(PLATFORM_ID);
 
   updateInvoice(id: string, updatedData: any) {
