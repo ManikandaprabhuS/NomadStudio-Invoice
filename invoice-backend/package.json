@@ -4,6 +4,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
+    "create-initial-admin": "node src/scripts/create-initial-admin.js",
+    "promote-admin": "node src/scripts/promote-admin.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

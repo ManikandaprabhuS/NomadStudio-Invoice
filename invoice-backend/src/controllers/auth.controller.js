@@ -21,24 +21,30 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-   const { userName, password } = req.body;
-    console.log('[LOGIN] Payload:', userName, password); // ✅ log input
+    const userName = req.body.userName?.trim();
+    const { password } = req.body;
+
+    if (!userName || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
+
     const login = await LoginModel.findOne({ userName });
-    console.log('[LOGIN] Retrieved:', login); // ✅ log output
     if (!login) return res.status(401).json({ message: 'Invalid credentials' });
     const ok = await bcrypt.compare(password, login.password);
     if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
  
     const token = jwt.sign(
-    { id: login._id },
-    process.env.JWT_SECRET
+    { id: login._id, role: login.role },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
   );
 
     res.json({
     token,
     user: {
       id: login._id,
-      userName: login.userName
+      userName: login.userName,
+      role: login.role
     }
   });
 
@@ -48,7 +54,70 @@ exports.login = async (req, res) => {
   }
 }
 
+exports.createUser = async (req, res) => {
+  try {
+    const userName = req.body.userName?.trim();
+    const emailId = req.body.emailId?.trim().toLowerCase();
+    const branchName = req.body.branchName?.trim();
+    const { password } = req.body;
 
+    if (!userName || !emailId || !branchName || !password) {
+      return res.status(400).json({ message: 'Username, email, branch, and password are required' });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    const user = await LoginModel.create({
+      userName,
+      emailId,
+      branchName,
+      password: await bcrypt.hash(password, 10),
+      role: 'user'
+    });
+
+    return res.status(201).json({
+      id: user._id,
+      userName: user.userName,
+      emailId: user.emailId,
+      branchName: user.branchName,
+      role: user.role
+    });
+  } catch (err) {
+    if (err.code === 11000) return res.status(409).json({ message: 'Username or email already exists' });
+    return res.status(500).json({ message: 'Unable to create user' });
+  }
+};
+exports.getUsers = async (_req, res) => {
+  try {
+    const users = await LoginModel.find()
+      .select('userName emailId branchName role createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.json(users);
+  } catch (_err) {
+    return res.status(500).json({ message: 'Unable to load users' });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await LoginModel.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User account not found' });
+
+    if (user.role !== 'user') {
+      return res.status(400).json({ message: 'Administrator accounts cannot be deleted' });
+    }
+
+    await user.deleteOne();
+    return res.json({ message: 'User account deleted' });
+  } catch (err) {
+    if (err.name === 'CastError') return res.status(400).json({ message: 'Invalid user account' });
+    return res.status(500).json({ message: 'Unable to delete user' });
+  }
+};
 exports.forgotPassword = async (req, res) => {
   try {
     const { emailId } = req.body;
@@ -106,6 +175,3 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ message: 'Reset failed' });
   }
 };
-
-// gmail app pswd to use
-// https://myaccount.google.com/apppasswords?rapt=AEjHL4NtAdH8Sn_GpvtL_71pYSQXF1RyPexmNb59ueHcsB9VWBAMAGVdrI5Ps_snoLCtBNylF3fP44rnJvPvwLrYO8Mf2g8Be3IfHEQhKNykMoL5c7BqKwo

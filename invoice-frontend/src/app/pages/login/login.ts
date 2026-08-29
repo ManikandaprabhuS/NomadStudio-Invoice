@@ -13,7 +13,7 @@ import { environment } from '../../../environments/environment';
 })
 export class Login {
   private authUrl = `${environment.apiBaseUrl}/auth`;
-  userName = 'NomadStudio';
+  userName = '';
   password = '';
   emailId = '';
   otp = '';
@@ -29,19 +29,22 @@ export class Login {
       this.showError = true;
       return;
     }
-    console.log('Logging in with', this.userName, this.password);
     this.http.post<any>(`${this.authUrl}/login`, {
-      userName: this.userName,
+      userName: this.userName.trim(),
       password: this.password
 
     }).subscribe({
       next: (res) => {
         localStorage.setItem('token', res.token);
-        console.log('Response data:', res);
+        localStorage.setItem('user', JSON.stringify(res.user));
         this.router.navigate(['/overview']);
       },
-      error: () => {
-        alert('Invalid password or Server Error');
+      error: (err) => {
+        alert(
+          err.status === 0
+            ? 'Unable to connect to the login server. Please try again shortly.'
+            : err.error?.message || 'Invalid username or password'
+        );
       }
     });
   }

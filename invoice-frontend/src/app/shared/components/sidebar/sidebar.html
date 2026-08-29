@@ -17,11 +17,6 @@
                 </a>
             </li>
             <li>
-                <a routerLink="/addclient" routerLinkActive="active">
-                    <span class="nav-text">Add Client</span>
-                </a>
-            </li>
-            <li>
                 <a routerLink="/clients" routerLinkActive="active">
                     <span class="nav-text">Client Details</span>
                 </a>
@@ -34,6 +29,11 @@
             <li>
                 <a routerLink="/services" routerLinkActive="active">
                     <span class="nav-text">Services</span>
+                </a>
+            </li>
+            <li *ngIf="isAdmin">
+                <a routerLink="/users" routerLinkActive="active">
+                    <span class="nav-text">User Management</span>
                 </a>
             </li>
             <li>

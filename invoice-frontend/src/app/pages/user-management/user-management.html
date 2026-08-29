@@ -1,0 +1,37 @@
+<section class="users-container">
+  <div class="header-section">
+    <div>
+      <h2>User Management</h2>
+      <p>Create the branch accounts that can access the shared studio records.</p>
+    </div>
+  </div>
+
+  <form class="user-card" (ngSubmit)="createUser()">
+    <h3>Create user</h3>
+    <div class="form-grid">
+      <label>Username<input name="userName" [(ngModel)]="newUser.userName" required /></label>
+      <label>Email address<input name="emailId" type="email" [(ngModel)]="newUser.emailId" required /></label>
+      <label>Branch name<input name="branchName" [(ngModel)]="newUser.branchName" required /></label>
+      <label>Password<input name="password" type="password" [(ngModel)]="newUser.password" minlength="8" autocomplete="new-password" required /></label>
+    </div>
+    <button type="submit" [disabled]="saving">{{ saving ? 'Creating...' : 'Create user' }}</button>
+  </form>
+
+  <p class="message error" *ngIf="error">{{ error }}</p>
+  <p class="message success" *ngIf="success">{{ success }}</p>
+
+  <div class="user-card" *ngIf="!loading">
+    <h3>Accounts</h3>
+    <table *ngIf="users.length; else noUsers">
+      <thead><tr><th>Username</th><th>Branch</th><th>Email</th><th>Access</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>{{ user.userName }}</td><td>{{ user.branchName || '—' }}</td><td>{{ user.emailId }}</td><td>{{ user.role }}</td>
+          <td><button *ngIf="user.role === 'user'" type="button" class="delete" (click)="deleteUser(user)">Delete</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noUsers><p>No accounts found.</p></ng-template>
+  </div>
+  <p class="message" *ngIf="loading">Loading users...</p>
+</section>
