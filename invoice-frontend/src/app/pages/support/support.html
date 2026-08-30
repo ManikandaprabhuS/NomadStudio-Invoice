@@ -1,0 +1,72 @@
+<main class="support-container">
+  <header class="page-header">
+    <span class="title-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M4 13v-2a8 8 0 0 1 16 0v2M4 13H2v5h4v-5zM20 13h2v5h-4v-5zM18 19c-1 2-3 2-5 2"/></svg>
+    </span>
+    <div>
+      <h1>Support</h1>
+      <p>We're here to help! Reach out to us for any issues or support.</p>
+    </div>
+  </header>
+
+  <section class="welcome-card">
+    <div>
+      <h2>How can we help you?</h2>
+      <p>If you are facing any issue, you can contact the admin directly<br class="desktop-break" /> using the options below.</p>
+    </div>
+    <div class="support-illustration" aria-hidden="true">
+      <svg viewBox="0 0 250 125">
+        <rect x="35" y="57" width="78" height="52" rx="8"/><path d="m38 62 36 29 36-29"/>
+        <path d="M146 12h70a18 18 0 0 1 18 18v18a18 18 0 0 1-18 18h-8l6 15-24-15h-44a18 18 0 0 1-18-18V30a18 18 0 0 1 18-18Z"/>
+        <circle cx="158" cy="39" r="5"/><circle cx="181" cy="39" r="5"/><circle cx="204" cy="39" r="5"/>
+        <path d="M156 102V88a28 28 0 0 1 56 0v14M156 95h-8v18h10V95zM212 95h8v18h-10V95zM208 113h-18"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="contact-grid" aria-label="Support contact options">
+    <article class="contact-card">
+      <div class="contact-heading">
+        <span class="contact-icon whatsapp-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 1-11.8 7L3 20l1.5-5A8 8 0 1 1 20 11.5Z"/><path d="M8.5 7.5c.5 4 3 6.5 7 7l1-2-2.5-1-1 1c-1.5-.7-2.8-2-3.5-3.5l1-1-1-2.5Z"/></svg>
+        </span>
+        <div><h2>WhatsApp</h2><p>Chat with us on WhatsApp for<br /> quick support.</p></div>
+      </div>
+      <div class="contact-value">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h4l2 5-2.5 1.5a15 15 0 0 0 5 5L16 12l5 2v4c0 1.7-1.3 3-3 3A15 15 0 0 1 3 6c0-1.7 1.3-3 3-3Z"/></svg>
+        <strong>{{ whatsAppNumber }}</strong>
+      </div>
+      <a class="contact-button" [href]="whatsAppUrl" target="_blank" rel="noopener noreferrer">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 1-11.8 7L3 20l1.5-5A8 8 0 1 1 20 11.5Z"/><path d="M8.5 7.5c.5 4 3 6.5 7 7l1-2-2.5-1-1 1c-1.5-.7-2.8-2-3.5-3.5l1-1-1-2.5Z"/></svg>
+        Chat on WhatsApp
+      </a>
+    </article>
+
+    <article class="contact-card">
+      <div class="contact-heading">
+        <span class="contact-icon email-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        </span>
+        <div><h2>Email</h2><p>Drop us an email and we'll<br /> get back to you soon.</p></div>
+      </div>
+      <div class="contact-value">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        <strong>{{ supportEmail }}</strong>
+      </div>
+      <a class="contact-button" [href]="emailUrl">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        Send an Email
+      </a>
+    </article>
+  </section>
+
+  <section class="help-card">
+    <span class="help-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10v7M12 7h.01"/></svg>
+    </span>
+    <div><h2>Need Help?</h2><p>We usually respond within 24 hours.</p><p>Thank you for using Nomad Studio.</p></div>
+    <div class="envelope-illustration" aria-hidden="true">
+      <svg viewBox="0 0 190 95"><path d="M65 38 98 10l34 28v49H65z"/><rect x="50" y="33" width="96" height="54" rx="5"/><path d="m52 39 46 37 46-37M52 85l34-29M144 85l-34-29"/><path d="M15 88c18-6 28-18 27-38 15 12 17 25 7 38M175 88c-18-6-28-18-27-38-15 12-17 25-7 38M4 89h182"/></svg>
+    </div>
+  </section>
+</main>

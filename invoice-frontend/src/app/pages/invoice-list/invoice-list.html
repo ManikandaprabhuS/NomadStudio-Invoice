@@ -59,7 +59,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="invoice-row" *ngFor="let invoice of paginatedCustomerInvoices">
+            <tr class="invoice-row" *ngFor="let invoice of paginatedCustomerInvoices; trackBy: trackInvoice">
               <td data-label="ID">{{ invoice._id | slice:-5 }}</td>
               <td data-label="Customer"><span class="client-name">{{ invoice.clientName }}</span></td>
               <td data-label="Service">{{ invoice.serviceType }}</td>
@@ -139,7 +139,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="invoice-row" *ngFor="let inv of paginatedInvoices">
+            <tr class="invoice-row" *ngFor="let inv of paginatedInvoices; trackBy: trackInvoice">
               <td data-label="ID">{{ inv._id | slice:-5 }}</td>
               <td data-label="Client">
                 <span class="client-name" *ngIf="editingInvoice?._id !== inv._id">{{ inv.userName }}</span>
@@ -161,8 +161,8 @@
                   [(ngModel)]="editingInvoice.receivedAmount" (ngModelChange)="updateEditingBalance()" />
               </td>
               <td data-label="Balance">
-                <span class="amount-cell" [style.color]="getDisplayedBalance(inv) > 0 ? 'var(--accent-amber)' : 'inherit'">
-                  ₹ {{ getDisplayedBalance(inv) | number }}
+                <span class="amount-cell" [style.color]="(editingInvoice?._id === inv._id ? editingInvoice.balanceAmount : inv.balanceAmount) > 0 ? 'var(--accent-amber)' : 'inherit'">
+                  ₹ {{ (editingInvoice?._id === inv._id ? editingInvoice.balanceAmount : inv.balanceAmount) | number }}
                 </span>
               </td>
               <td data-label="Date"><span class="date-cell">{{ inv.createdAt | date:'dd MMM yyyy' }}</span></td>

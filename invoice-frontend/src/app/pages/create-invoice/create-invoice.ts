@@ -155,6 +155,14 @@ export class CreateInvoice implements OnInit, OnDestroy {
     }, 300);
   }
 
+  trackInvoiceService(_index: number, service: object): object {
+    return service;
+  }
+
+  trackServiceType(_index: number, service: ServiceType): string {
+    return service._id;
+  }
+
   private normalizePhone(value: unknown): string {
     const digits = String(value || '').replace(/\D/g, '');
     return digits.length > 10 ? digits.slice(-10) : digits;

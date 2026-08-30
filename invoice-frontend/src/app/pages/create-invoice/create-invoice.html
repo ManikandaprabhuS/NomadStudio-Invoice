@@ -92,11 +92,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let service of invoice.services; let i = index" class="service-row-item">
+          <tr *ngFor="let service of invoice.services; let i = index; trackBy: trackInvoiceService" class="service-row-item">
             <td data-label="Service Type">
               <select class="service-select" [(ngModel)]="service.serviceType" required>
                 <option value="" disabled>Select Service</option>
-                <option *ngFor="let serviceType of serviceTypes" [value]="serviceType.name">
+                <option *ngFor="let serviceType of serviceTypes; trackBy: trackServiceType" [value]="serviceType.name">
                   {{ serviceType.name }}
                 </option>
               </select>

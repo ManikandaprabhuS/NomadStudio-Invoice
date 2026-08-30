@@ -1,17 +1,15 @@
-import { Component, ElementRef, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Invoice } from '../service/invoice';
 import { CommonModule } from '@angular/common';
 import { Client } from '../service/client';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { FormsModule } from '@angular/forms';
-import { error } from 'node:console';
 import { Expense } from '../service/expense';
-import { Chart, ChartConfiguration, registerables } from 'chart.js/auto';
+import { Chart } from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { AlertService } from '../service/alert.service';
 import { ServiceCatalog, ServiceType } from '../service/service-catalog';
 import { PaymentMode, QuickAddIncomeRecord, QuickAddIncomeService } from '../service/quick-add-income';
-import { jsPDF } from 'jspdf';
 
 
 @Component({
@@ -20,7 +18,7 @@ import { jsPDF } from 'jspdf';
   templateUrl: './overview.html',
   styleUrl: './overview.css',
 })
-export class Overview implements OnInit {
+export class Overview implements OnInit, OnDestroy {
 
   // ================= EXISTING =================
   totalClients = 0;
@@ -71,6 +69,11 @@ export class Overview implements OnInit {
     this.loadDashboardData();
   }
 
+  ngOnDestroy(): void {
+    this.chart?.destroy();
+    this.chart = null;
+  }
+
   loadServices(): void {
     this.serviceCatalog.getServices().subscribe({
       next: services => this.serviceTypes = services,
@@ -82,21 +85,14 @@ export class Overview implements OnInit {
   // ================= EXISTING METHOD (UNCHANGED LOGIC) =================
   async loadDashboardData() {
     try {
-      // Clients (Observable → Promise)
-      const clients: any[] = await firstValueFrom(
-        this.clientService.getAllClients()
-      );
-      const expense: any[] = await firstValueFrom(
-        this.expenseService.getExpenses()
-      );
-      const quickAddIncomes: QuickAddIncomeRecord[] = await firstValueFrom(
-        this.quickAddIncomeService.getIncomes()
-      );
+      const [clients, expense, quickAddIncomes, invoices] = await Promise.all([
+        firstValueFrom(this.clientService.getAllClients()),
+        firstValueFrom(this.expenseService.getExpenses()),
+        firstValueFrom(this.quickAddIncomeService.getIncomes()),
+        this.invoiceService.getInvoices()
+      ]);
       this.quickAddIncomeRecords = quickAddIncomes;
       this.allExpenses = expense;
-
-      // Invoices (Promise)
-      const invoices: any[] = await this.invoiceService.getInvoices();
 
       this.allInvoices = [
         ...invoices,
@@ -263,8 +259,6 @@ export class Overview implements OnInit {
     const ctx = this.incomeChartRef.nativeElement.getContext('2d');
     if (!ctx) return;
 
-    Chart.register(ChartDataLabels); // Register globally to be safe and easy
-
     this.chart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -290,6 +284,7 @@ export class Overview implements OnInit {
           }
         ]
       },
+      plugins: [ChartDataLabels],
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -459,6 +454,10 @@ export class Overview implements OnInit {
     this.incomePaymentMode = checked ? mode : '';
   }
 
+  trackServiceType(_index: number, service: ServiceType): string {
+    return service._id;
+  }
+
   generateQuickIncomeReport(): void {
     this.quickAddIncomeService.getIncomes().subscribe({
       next: records => {
@@ -468,14 +467,15 @@ export class Overview implements OnInit {
           return;
         }
 
-        this.downloadQuickIncomePdf(records);
+        void this.downloadQuickIncomePdf(records);
       },
       error: () => this.alertService.error('Failed to generate Quick Add Income report')
     });
   }
 
-  private downloadQuickIncomePdf(records: QuickAddIncomeRecord[]): void {
+  private async downloadQuickIncomePdf(records: QuickAddIncomeRecord[]): Promise<void> {
     try {
+      const { jsPDF } = await import('jspdf');
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();

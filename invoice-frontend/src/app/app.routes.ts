@@ -1,43 +1,69 @@
 import { Routes } from '@angular/router';
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { Login } from './pages/login/login';
-import { Dashboard } from './pages/dashboard/dashboard';
-import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { MainLayout } from './layout/main-layout/main-layout';
-import { CreateInvoice } from './pages/create-invoice/create-invoice';
-import { InvoiceList } from './pages/invoice-list/invoice-list';
-import { Clients } from './pages/clients/clients';
-import { Overview } from './pages/overview/overview';
-import { authGuard } from './guards/auth.guard';
-import { ExpenseList } from './pages/expense-list/expense-list';
-import { Services } from './pages/services/services';
-import { UserManagement } from './pages/user-management/user-management';
 import { adminGuard } from './guards/admin.guard';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: Login },
   {
-    path: '',  component: MainLayout,
+    path: 'login',
+    loadComponent: () => import('./pages/login/login').then(component => component.Login),
+  },
+  {
+    path: '',
+    loadComponent: () => import('./layout/main-layout/main-layout').then(component => component.MainLayout),
     children: [
-      { path: 'dashboard', component: Dashboard , canActivate: [authGuard] },
-      // add more pages here later
-      { path: 'invoices', component: CreateInvoice, data: { invoiceType: 'Business' }, canActivate: [authGuard] },
-      { path: 'customer-invoice', component: CreateInvoice, data: { invoiceType: 'Customer' }, canActivate: [authGuard] },
-      { path: 'listinvoices', component: InvoiceList , canActivate: [authGuard]   },
-      { path: 'clients', component: Clients , canActivate: [authGuard] },
-      {path:'overview', component:Overview, canActivate: [authGuard]},
-      {path:'expense', component:ExpenseList, canActivate: [authGuard]},
-      {path:'services', component:Services, canActivate: [authGuard]},
-      {path:'users', component:UserManagement, canActivate: [authGuard, adminGuard]}
-    ]
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/dashboard/dashboard').then(component => component.Dashboard),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'invoices',
+        loadComponent: () => import('./pages/create-invoice/create-invoice').then(component => component.CreateInvoice),
+        data: { invoiceType: 'Business' },
+        canActivate: [authGuard],
+      },
+      {
+        path: 'customer-invoice',
+        loadComponent: () => import('./pages/create-invoice/create-invoice').then(component => component.CreateInvoice),
+        data: { invoiceType: 'Customer' },
+        canActivate: [authGuard],
+      },
+      {
+        path: 'listinvoices',
+        loadComponent: () => import('./pages/invoice-list/invoice-list').then(component => component.InvoiceList),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'clients',
+        loadComponent: () => import('./pages/clients/clients').then(component => component.Clients),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'overview',
+        loadComponent: () => import('./pages/overview/overview').then(component => component.Overview),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'expense',
+        loadComponent: () => import('./pages/expense-list/expense-list').then(component => component.ExpenseList),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'services',
+        loadComponent: () => import('./pages/services/services').then(component => component.Services),
+        canActivate: [authGuard],
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./pages/user-management/user-management').then(component => component.UserManagement),
+        canActivate: [authGuard, adminGuard],
+      },
+      {
+        path: 'support',
+        loadComponent: () => import('./pages/support/support').then(component => component.Support),
+        canActivate: [authGuard],
+      },
+    ],
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes), FormsModule, HttpClientModule],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }

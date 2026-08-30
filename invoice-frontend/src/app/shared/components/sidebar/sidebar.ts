@@ -11,9 +11,13 @@ import { Router, RouterModule } from '@angular/router';
 export class Sidebar {
 
   @Output() close = new EventEmitter<void>();
-constructor(private router: Router) {}
+  isAdmin = false;
 
-  get isAdmin(): boolean {
+  constructor(private router: Router) {
+    this.isAdmin = this.readAdminRole();
+  }
+
+  private readAdminRole(): boolean {
     if (typeof localStorage === 'undefined') return false;
 
     try {

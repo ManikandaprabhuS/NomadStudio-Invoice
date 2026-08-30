@@ -1,58 +1,79 @@
-<div class="services-container">
-  <div class="header-section">
-    <div>
-      <h2>Services</h2>
-      <p>Manage the service types available across the app.</p>
+<main class="services-container">
+  <header class="page-header">
+    <div class="title-group">
+      <span class="title-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5-5L7 4l3 3-3 3-3-3-2.7 2.7a4 4 0 0 0 5 5L15 6Z"/><path d="m8 16-5 5"/><path d="m16 8 5-5"/><path d="m14 14 7 7"/></svg>
+      </span>
+      <div>
+        <h1>Services</h1>
+        <p>Manage the service types available across the app.</p>
+      </div>
     </div>
-  </div>
+    <div class="header-illustration" aria-hidden="true">
+      <svg viewBox="0 0 120 80"><rect x="27" y="10" width="62" height="60" rx="6"/><path d="M43 25h30M43 38h30M43 51h20"/><circle cx="35" cy="25" r="3"/><circle cx="35" cy="38" r="3"/><circle cx="35" cy="51" r="3"/><path d="m86 50 7 2 5-5 5 5 7-2 2 7 7 2-2 7 5 5-5 5-7-2-2 7-7-2-5 5-5-5-7 2-2-7-7-2 2-7-5-5 5-5 7 2 2-7Z"/><circle cx="98" cy="62" r="7"/></svg>
+    </div>
+  </header>
 
   <form class="add-service-card" (ngSubmit)="addService()">
-    <label for="serviceName">Service name</label>
+    <h2>Add New Service</h2>
     <div class="add-service-row">
-      <input id="serviceName" name="serviceName" type="text" [(ngModel)]="serviceName"
-        placeholder="Enter service name" required />
-      <button type="submit" [disabled]="!serviceName.trim() || saving">Add Service</button>
+      <label class="service-input" for="serviceName">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m8 10 2 2-2 2M13 14h3"/></svg>
+        <input id="serviceName" name="serviceName" type="text" [(ngModel)]="serviceName"
+          placeholder="Enter service name" required />
+      </label>
+      <button class="primary-button" type="submit" [disabled]="!serviceName.trim() || saving">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        {{ saving ? 'Saving...' : 'Add Service' }}
+      </button>
     </div>
   </form>
 
-  <div *ngIf="loading" class="service-skeleton" aria-label="Loading services">
+  <section *ngIf="loading" class="service-list-card service-skeleton" aria-label="Loading services">
+    <div class="list-heading skeleton skeleton-heading"></div>
     <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3, 4]">
+      <span class="skeleton skeleton-avatar"></span>
       <span class="skeleton skeleton-line medium"></span>
       <span class="skeleton skeleton-line short"></span>
     </div>
-  </div>
+  </section>
 
-  <div class="table-card" *ngIf="!loading && services.length">
-    <table>
-      <thead>
-        <tr>
-          <th>Service Name</th>
-          <th class="actions-heading">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let service of services">
-          <td data-label="Service Name">
-            <span *ngIf="editingService?._id !== service._id">{{ service.name }}</span>
-            <input *ngIf="editingService?._id === service._id" [(ngModel)]="editingService!.name"
-              [ngModelOptions]="{standalone: true}" />
-          </td>
-          <td data-label="Actions">
-            <div class="action-buttons">
-              <button type="button" class="secondary" *ngIf="editingService?._id !== service._id"
-                (click)="editService(service)">Edit</button>
-              <button type="button" class="save" *ngIf="editingService?._id === service._id"
-                [disabled]="!editingService!.name.trim() || saving" (click)="saveEdit()">Save</button>
-              <button type="button" class="secondary" *ngIf="editingService?._id === service._id"
-                (click)="cancelEdit()">Cancel</button>
-              <button type="button" class="delete" *ngIf="editingService?._id !== service._id"
-                (click)="deleteService(service)">Delete</button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <section class="service-list-card" *ngIf="!loading && services.length" aria-labelledby="allServicesHeading">
+    <h2 id="allServicesHeading">All Services</h2>
+    <div class="list-columns" aria-hidden="true"><span>Service Name</span><span>Actions</span></div>
+    <div class="service-list">
+      <article class="service-row" *ngFor="let service of paginatedServices; trackBy: trackService">
+        <div class="service-detail">
+          <span class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2M8 11h8M8 15h5"/></svg>
+          </span>
+          <span class="service-name" *ngIf="editingService?._id !== service._id">{{ service.name }}</span>
+          <input class="edit-input" *ngIf="editingService?._id === service._id" [(ngModel)]="editingService!.name"
+            [ngModelOptions]="{standalone: true}" aria-label="Edit service name" />
+        </div>
+        <div class="action-buttons">
+          <button type="button" class="outline-button" *ngIf="editingService?._id !== service._id" (click)="editService(service)">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 16-1 5 5-1L19 9l-4-4Z"/><path d="m13 7 4 4"/></svg> Edit
+          </button>
+          <button type="button" class="save-button" *ngIf="editingService?._id === service._id"
+            [disabled]="!editingService!.name.trim() || saving" (click)="saveEdit()">Save</button>
+          <button type="button" class="outline-button" *ngIf="editingService?._id === service._id" (click)="cancelEdit()">Cancel</button>
+          <button type="button" class="delete-button" *ngIf="editingService?._id !== service._id" (click)="deleteService(service)">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg> Delete
+          </button>
+        </div>
+      </article>
+    </div>
+    <footer class="pagination-footer">
+      <p>Showing {{ rangeStart }} to {{ rangeEnd }} of {{ services.length }} services</p>
+      <nav class="pagination" aria-label="Services pagination">
+        <button type="button" class="page-nav" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)"><span aria-hidden="true">‹</span> Previous</button>
+        <button type="button" class="page-number" *ngFor="let page of pageNumbers" [class.active]="page === currentPage"
+          [attr.aria-current]="page === currentPage ? 'page' : null" (click)="goToPage(page)">{{ page }}</button>
+        <button type="button" class="page-nav" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Next <span aria-hidden="true">›</span></button>
+      </nav>
+    </footer>
+  </section>
 
   <div *ngIf="!loading && !services.length" class="state-message">No services added yet.</div>
-</div>
+</main>

@@ -1,45 +1,118 @@
-<section class="users-container">
-  <div class="header-section">
+<main class="users-container">
+  <header class="page-header">
+    <span class="title-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><circle cx="12" cy="10" r="3"/><path d="M8 17c.8-2 2.1-3 4-3s3.2 1 4 3"/></svg>
+    </span>
     <div>
-      <h2>User Management</h2>
+      <h1>User Management</h1>
       <p>Create the branch accounts that can access the shared studio records.</p>
     </div>
-  </div>
+  </header>
 
-  <form class="user-card" (ngSubmit)="createUser()">
-    <h3>Create user</h3>
+  <form class="user-card create-card" (ngSubmit)="createUser()">
+    <h2>
+      <span class="section-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19c0-4 2-6 6-6 1.3 0 2.4.2 3.3.7M18 8v8M14 12h8"/></svg>
+      </span>
+      Create New User
+    </h2>
+
     <div class="form-grid">
-      <label>Username<input name="userName" [(ngModel)]="newUser.userName" required /></label>
-      <label>Email address<input name="emailId" type="email" [(ngModel)]="newUser.emailId" required /></label>
-      <label>Branch name<input name="branchName" [(ngModel)]="newUser.branchName" required /></label>
-      <label>Password<input name="password" type="password" [(ngModel)]="newUser.password" minlength="8" autocomplete="new-password" required /></label>
+      <label>
+        <span>Username</span>
+        <span class="input-shell">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M6 20v-2c0-4 2-6 6-6s6 2 6 6v2"/></svg>
+          <input name="userName" [(ngModel)]="newUser.userName" placeholder="Enter username" required />
+        </span>
+      </label>
+      <label>
+        <span>Email Address</span>
+        <span class="input-shell">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+          <input name="emailId" type="email" [(ngModel)]="newUser.emailId" placeholder="Enter email address" required />
+        </span>
+      </label>
+      <label>
+        <span>Branch Name</span>
+        <span class="input-shell">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 21V6l7-3v18M12 9h7v12M8 9h1M8 13h1M8 17h1M15 13h1M15 17h1M3 21h18"/></svg>
+          <input name="branchName" [(ngModel)]="newUser.branchName" placeholder="Enter branch name" required />
+        </span>
+      </label>
+      <label>
+        <span>Password</span>
+        <span class="input-shell password-shell">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <input name="password" [type]="showPassword ? 'text' : 'password'" [(ngModel)]="newUser.password"
+            placeholder="Enter password" minlength="8" autocomplete="new-password" required />
+          <button class="password-toggle" type="button" (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+          </button>
+        </span>
+      </label>
     </div>
-    <button type="submit" [disabled]="saving">{{ saving ? 'Creating...' : 'Create user' }}</button>
+
+    <button class="create-button" type="submit" [disabled]="saving">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19c0-4 2-6 6-6 1.3 0 2.4.2 3.3.7M18 8v8M14 12h8"/></svg>
+      {{ saving ? 'Creating...' : 'Create User' }}
+    </button>
   </form>
 
   <p class="message error" *ngIf="error">{{ error }}</p>
   <p class="message success" *ngIf="success">{{ success }}</p>
 
-  <div class="user-card user-skeleton" *ngIf="loading" aria-label="Loading user accounts">
-    <span class="skeleton skeleton-line short"></span>
+  <section class="user-card user-skeleton" *ngIf="loading" aria-label="Loading user accounts">
+    <span class="skeleton skeleton-heading"></span>
     <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3]">
-      <span class="skeleton skeleton-line" *ngFor="let cell of [1, 2, 3, 4]"></span>
+      <span class="skeleton skeleton-avatar"></span>
+      <span class="skeleton skeleton-line"></span>
+      <span class="skeleton skeleton-line"></span>
+      <span class="skeleton skeleton-line short"></span>
     </div>
-  </div>
+  </section>
 
-  <div class="user-card" *ngIf="!loading">
-    <h3>Accounts</h3>
+  <section class="user-card accounts-card" *ngIf="!loading">
+    <h2>
+      <span class="section-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20v-2c0-4 2-6 6-6s6 2 6 6v2M16 14c3 0 5 1.7 5 5v1"/></svg>
+      </span>
+      Accounts
+    </h2>
+
     <div class="users-table-wrap" *ngIf="users.length; else noUsers">
       <table>
         <thead><tr><th>Username</th><th>Branch</th><th>Email</th><th>Access</th><th>Actions</th></tr></thead>
         <tbody>
-          <tr *ngFor="let user of users">
-            <td>{{ user.userName }}</td><td>{{ user.branchName || '—' }}</td><td>{{ user.emailId }}</td><td>{{ user.role }}</td>
-            <td><button *ngIf="user.role === 'user'" type="button" class="delete" (click)="deleteUser(user)">Delete</button></td>
+          <tr *ngFor="let user of paginatedUsers; trackBy: trackUser">
+            <td data-label="Username">
+              <div class="user-identity"><span class="user-avatar">{{ user.userName.charAt(0) | uppercase }}</span><strong>{{ user.userName }}</strong></div>
+            </td>
+            <td data-label="Branch">{{ user.branchName || '—' }}</td>
+            <td data-label="Email" class="email-cell">{{ user.emailId }}</td>
+            <td data-label="Access"><span class="role-badge">{{ user.role | titlecase }}</span></td>
+            <td data-label="Actions">
+              <button *ngIf="user.role === 'user'" type="button" class="delete-button" (click)="deleteUser(user)">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+                Delete
+              </button>
+              <span *ngIf="user.role !== 'user'" class="no-action">—</span>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <ng-template #noUsers><p>No accounts found.</p></ng-template>
-  </div>
-</section>
+
+    <ng-template #noUsers><p class="empty-state">No accounts found.</p></ng-template>
+
+    <footer class="pagination-footer" *ngIf="users.length">
+      <p>Showing {{ rangeStart }} to {{ rangeEnd }} of {{ users.length }} accounts</p>
+      <nav class="pagination" aria-label="Accounts pagination">
+        <button type="button" class="page-nav" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)"><span aria-hidden="true">‹</span> Previous</button>
+        <button type="button" class="page-number" *ngFor="let page of pageNumbers" [class.active]="page === currentPage"
+          [attr.aria-current]="page === currentPage ? 'page' : null" (click)="goToPage(page)">{{ page }}</button>
+        <button type="button" class="page-nav" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Next <span aria-hidden="true">›</span></button>
+      </nav>
+    </footer>
+  </section>
+</main>

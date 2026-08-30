@@ -1,12 +1,26 @@
 <div class="clients-container">
     <div class="header-section">
-        <h2 class="page-title">Client Details</h2>
+        <div class="title-group">
+            <span class="title-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="9" r="2"></circle><path d="M3 20c.5-4 2.6-6 6-6s5.5 2 6 6M15 15c3 0 4.7 1.7 5 5"></path></svg>
+            </span>
+            <div>
+                <h2 class="page-title">Client Details</h2>
+                <p class="page-subtitle">View and manage all your client information</p>
+            </div>
+        </div>
 
         <div class="header-actions">
-            <div class="search-box">
+            <label class="search-box">
+                <span class="sr-only">Search clients</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16.5 16.5 4 4"></path></svg>
                 <input class="client-search" type="text" placeholder="Search by name or phone..."
                     [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" />
-            </div>
+            </label>
+            <button class="report-button" type="button" (click)="generateReport()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4M5 21h14"></path></svg>
+                Generate Report
+            </button>
         </div>
     </div>
 
@@ -16,99 +30,77 @@
         </div>
     </div>
 
-    <div class="table-container" *ngIf="!loading && filteredClients.length > 0">
-        <table class="client-table">
-            <thead>
-                <tr>
-                    <th>Client Content</th>
-                    <th>Phone</th>
-                    <th>GST Number</th>
-                    <th>Email</th>
-                    <th>Address</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let client of paginatedClients" class="client-row">
-                    <!-- Name -->
-                    <td data-label="Name">
-                        <div class="client-info" *ngIf="editingClient?._id !== client._id">
-                            <span class="client-name">{{ client.userName }}</span>
-                        </div>
-                        <input class="edit-input" *ngIf="editingClient?._id === client._id"
-                            [(ngModel)]="editingClient.userName" placeholder="Client Name" />
-                    </td>
+    <div class="client-list-card" *ngIf="!loading && filteredClients.length > 0">
+        <div class="table-container">
+            <table class="client-table">
+                <thead>
+                    <tr><th>Client Name</th><th>Phone</th><th>GST Number</th><th>Email</th><th>Address</th><th class="text-right">Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let client of paginatedClients; trackBy: trackClient" class="client-row">
+                        <td data-label="Client Name">
+                            <div class="client-info" *ngIf="editingClient?._id !== client._id">
+                                <span class="client-avatar" aria-hidden="true">{{ getClientInitial(client) }}</span>
+                                <span class="client-name">{{ client.userName }}</span>
+                            </div>
+                            <input class="edit-input" *ngIf="editingClient?._id === client._id" [(ngModel)]="editingClient.userName" placeholder="Client Name" />
+                        </td>
+                        <td data-label="Phone">
+                            <span class="detail-value phone-cell" *ngIf="editingClient?._id !== client._id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l3-1 2 5-2 2c1.5 3 3.5 5 6 6l2-2 5 2-1 3c-.5 1.5-2 2-3.5 1.6C9.5 19 5 14.5 3.4 7.5 3 6 3.5 4.5 5 4z"></path></svg>
+                                {{ client.phoneNumber }}
+                            </span>
+                            <input class="edit-input" *ngIf="editingClient?._id === client._id" [(ngModel)]="editingClient.phoneNumber" placeholder="Phone Number" />
+                        </td>
+                        <td data-label="GST Number">
+                            <span *ngIf="editingClient?._id !== client._id">{{ client.gstNumber || '-' }}</span>
+                            <input class="edit-input" *ngIf="editingClient?._id === client._id" [(ngModel)]="editingClient.gstNumber" placeholder="GST Number" maxlength="15" />
+                        </td>
+                        <td data-label="Email">
+                            <span class="detail-value email-cell" *ngIf="editingClient?._id !== client._id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg>
+                                {{ client.emailId }}
+                            </span>
+                            <input class="edit-input" *ngIf="editingClient?._id === client._id" [(ngModel)]="editingClient.emailId" placeholder="Email Address" />
+                        </td>
+                        <td data-label="Address">
+                            <span class="detail-value address-cell" *ngIf="editingClient?._id !== client._id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+                                {{ client.address }}
+                            </span>
+                            <input class="edit-input" *ngIf="editingClient?._id === client._id" [(ngModel)]="editingClient.address" placeholder="Address" />
+                        </td>
+                        <td class="text-right" data-label="Actions">
+                            <div class="action-buttons">
+                                <button class="btn-action edit" title="Edit Client" *ngIf="editingClient?._id !== client._id" (click)="editClient(client)">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4-1 11-11-3-3L5 16zM14 7l3 3"></path></svg>
+                                </button>
+                                <button class="btn-action success" title="Save Changes" *ngIf="editingClient?._id === client._id" (click)="saveEdit()">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>
+                                </button>
+                                <button class="btn-action danger" title="Cancel" *ngIf="editingClient?._id === client._id" (click)="cancelEdit()">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+                                </button>
+                                <button class="btn-action danger" title="Delete Client" *ngIf="editingClient?._id !== client._id" (click)="deleteClient(client._id)">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-                    <!-- Phone -->
-                    <td data-label="Phone">
-                        <span class="phone-cell" *ngIf="editingClient?._id !== client._id">{{ client.phoneNumber
-                            }}</span>
-                        <input class="edit-input" *ngIf="editingClient?._id === client._id"
-                            [(ngModel)]="editingClient.phoneNumber" placeholder="Phone Number" />
-                    </td>
-
-                    <td data-label="GST Number">
-                        <span *ngIf="editingClient?._id !== client._id">{{ client.gstNumber || '-' }}</span>
-                        <input class="edit-input" *ngIf="editingClient?._id === client._id"
-                            [(ngModel)]="editingClient.gstNumber" placeholder="GST Number" maxlength="15" />
-                    </td>
-
-                    <!-- Email -->
-                    <td data-label="Email">
-                        <span class="email-cell" *ngIf="editingClient?._id !== client._id">{{ client.emailId }}</span>
-                        <input class="edit-input" *ngIf="editingClient?._id === client._id"
-                            [(ngModel)]="editingClient.emailId" placeholder="Email Address" />
-                    </td>
-
-                    <!-- Address -->
-                    <td data-label="Address">
-                        <span class="address-cell" *ngIf="editingClient?._id !== client._id">{{ client.address }}</span>
-                        <input class="edit-input" *ngIf="editingClient?._id === client._id"
-                            [(ngModel)]="editingClient.address" placeholder="Address" />
-                    </td>
-
-                    <!-- Actions -->
-                    <td class="text-right">
-                        <div class="action-buttons">
-                            <!-- View/Edit -->
-                            <button class="btn-action" title="Edit Client" *ngIf="editingClient?._id !== client._id"
-                                (click)="editClient(client)">
-                                ✏️
-                            </button>
-
-                            <!-- Save / Cancel (Editing) -->
-                            <button class="btn-action success" title="Save Changes"
-                                *ngIf="editingClient?._id === client._id" (click)="saveEdit()">
-                                ✅
-                            </button>
-                            <button class="btn-action danger" title="Cancel" *ngIf="editingClient?._id === client._id"
-                                (click)="cancelEdit()">
-                                ❌
-                            </button>
-
-                            <!-- Delete -->
-                            <button class="btn-action danger" title="Delete Client"
-                                *ngIf="editingClient?._id !== client._id" (click)="deleteClient(client._id)">
-                                🗑️
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination-container" *ngIf="totalPages > 1">
-        <button class="btn-pagination" (click)="prevPage()" [disabled]="currentPage === 1">
-            Previous
-        </button>
-        <span class="page-info">
-            Page {{ currentPage }} of {{ totalPages }}
-        </span>
-        <button class="btn-pagination" (click)="nextPage()" [disabled]="currentPage === totalPages">
-            Next
-        </button>
+        <div class="pagination-footer">
+            <span class="results-summary">Showing {{ showingStart }} to {{ showingEnd }} of {{ filteredClients.length }} clients</span>
+            <nav class="pagination-container" aria-label="Client pagination">
+                <button class="btn-pagination" type="button" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+                <div class="page-numbers">
+                    <button class="page-number" type="button" *ngFor="let page of pageNumbers" [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+                </div>
+                <button class="btn-pagination" type="button" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+            </nav>
+        </div>
     </div>
 
     <div *ngIf="!loading && filteredClients.length === 0" class="no-results">

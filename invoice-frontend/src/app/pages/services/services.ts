@@ -17,6 +17,13 @@ export class Services implements OnInit {
   editingService: ServiceType | null = null;
   loading = true;
   saving = false;
+  currentPage = 1;
+  readonly pageSize = 4;
+  totalPages = 1;
+  pageNumbers: number[] = [1];
+  paginatedServices: ServiceType[] = [];
+  rangeStart = 0;
+  rangeEnd = 0;
 
   constructor(
     private serviceCatalog: ServiceCatalog,
@@ -32,6 +39,8 @@ export class Services implements OnInit {
     this.serviceCatalog.getServices().subscribe({
       next: services => {
         this.services = services;
+        this.currentPage = 1;
+        this.updatePagination();
         this.loading = false;
       },
       error: () => {
@@ -97,5 +106,25 @@ export class Services implements OnInit {
       },
       error: () => this.alertService.error('Failed to delete service')
     });
+  }
+
+  private updatePagination(): void {
+    this.totalPages = Math.max(1, Math.ceil(this.services.length / this.pageSize));
+    this.currentPage = Math.min(this.currentPage, this.totalPages);
+    this.pageNumbers = Array.from({ length: this.totalPages }, (_, index) => index + 1);
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.paginatedServices = this.services.slice(start, start + this.pageSize);
+    this.rangeStart = this.services.length ? start + 1 : 0;
+    this.rangeEnd = Math.min(start + this.pageSize, this.services.length);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
+  trackService(_index: number, service: ServiceType): string {
+    return service._id;
   }
 }

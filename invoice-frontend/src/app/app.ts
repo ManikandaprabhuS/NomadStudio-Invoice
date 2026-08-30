@@ -1,13 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { AlertComponent } from './shared/components/alert/alert.component';
-import { RouterModule, RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { RouterOutlet } from '@angular/router';
 
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, FormsModule, HttpClientModule, AlertComponent],
+  imports: [RouterOutlet, AlertComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

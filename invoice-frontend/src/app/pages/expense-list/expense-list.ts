@@ -17,7 +17,16 @@ export class ExpenseList implements OnInit {
   loading = true;
   searchTerm = '';
   filteredExpenses: any[] = [];
-  currentPage: number = 0;
+  currentPage = 1;
+  readonly pageSize = 5;
+  totalAmount = 0;
+  thisMonthAmount = 0;
+  averageExpense = 0;
+  totalPages = 1;
+  pageNumbers: number[] = [1];
+  paginatedExpenses: any[] = [];
+  rangeStart = 0;
+  rangeEnd = 0;
 
 
   constructor(private expenseService: Expense, private alertService: AlertService) { }
@@ -37,11 +46,16 @@ export class ExpenseList implements OnInit {
         ? res
         : await firstValueFrom(res);
       this.filteredExpenses = [...this.expenses];
+      this.currentPage = 1;
+      this.updateSummary();
+      this.updatePagination();
 
     } catch (err) {
       console.error('Failed to load expenses', err);
       this.expenses = [];
       this.filteredExpenses = [];
+      this.updateSummary();
+      this.updatePagination();
     } finally {
       this.loading = false;
     }
@@ -60,8 +74,43 @@ export class ExpenseList implements OnInit {
     }
 
     this.currentPage = 1;
-    console.log('Search:', this.searchTerm);
-    console.log('Filtered:', this.filteredExpenses.length);
+    this.updatePagination();
+  }
+
+  private updateSummary(): void {
+    const now = new Date();
+    this.totalAmount = this.expenses.reduce(
+      (total, expense) => total + (Number(expense.amount) || 0),
+      0
+    );
+    this.thisMonthAmount = this.expenses.reduce((total, expense) => {
+      const date = new Date(expense.createdAt);
+      const isCurrentMonth = !Number.isNaN(date.getTime())
+        && date.getMonth() === now.getMonth()
+        && date.getFullYear() === now.getFullYear();
+      return isCurrentMonth ? total + (Number(expense.amount) || 0) : total;
+    }, 0);
+    this.averageExpense = this.expenses.length ? this.totalAmount / this.expenses.length : 0;
+  }
+
+  private updatePagination(): void {
+    this.totalPages = Math.max(1, Math.ceil(this.filteredExpenses.length / this.pageSize));
+    this.currentPage = Math.min(this.currentPage, this.totalPages);
+    this.pageNumbers = Array.from({ length: this.totalPages }, (_, index) => index + 1);
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.paginatedExpenses = this.filteredExpenses.slice(start, start + this.pageSize);
+    this.rangeStart = this.filteredExpenses.length ? start + 1 : 0;
+    this.rangeEnd = Math.min(start + this.pageSize, this.filteredExpenses.length);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
+  trackExpense(_index: number, expense: any): string {
+    return expense._id;
   }
 
   // ✅ NEW: Delete expense method
@@ -79,6 +128,7 @@ export class ExpenseList implements OnInit {
 
       // Remove from local arrays
       this.expenses = this.expenses.filter(e => e._id !== expenseId);
+      this.updateSummary();
       this.applyFilter(); // Refresh filtered list
 
       this.alertService.success('Expense deleted successfully');
@@ -92,6 +142,7 @@ export class ExpenseList implements OnInit {
       if (err.status === 200 || err.status === 204) {
         // Sometimes DELETE returns 204 No Content which can be treated as error
         this.expenses = this.expenses.filter(e => e._id !== expenseId);
+        this.updateSummary();
         this.applyFilter();
         this.alertService.success('Expense deleted successfully');
       } else {

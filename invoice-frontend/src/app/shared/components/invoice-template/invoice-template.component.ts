@@ -69,6 +69,10 @@ export class InvoiceTemplateComponent implements OnChanges {
             : this.roundCurrency(this.displayTotal - totalBeforeRoundOff);
     }
 
+    trackServiceRow(index: number): number {
+        return index;
+    }
+
     private hasNumber(value: unknown): boolean {
         return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
     }

@@ -6,7 +6,6 @@ import { Invoice } from '../service/invoice';
 import { InvoiceTemplateComponent } from '../../shared/components/invoice-template/invoice-template.component';
 import { AlertService } from '../service/alert.service';
 import { QuickAddIncomeRecord, QuickAddIncomeService } from '../service/quick-add-income';
-import { jsPDF } from 'jspdf';
 import { Client } from '../service/client';
 
 @Component({
@@ -46,6 +45,8 @@ export class InvoiceList implements OnInit {
   customerCurrentPage = 1;
   customerTotalPages = 1;
   readonly pageSizeOptions = [4, 10, 20];
+  pageNumbers: number[] = [];
+  customerPageNumbers: number[] = [];
 
   constructor(
     private invoiceService: Invoice,
@@ -130,12 +131,14 @@ export class InvoiceList implements OnInit {
 
   calculatePagination() {
     this.totalPages = Math.ceil(this.filteredInvoices.length / this.pageSize);
+    this.pageNumbers = Array.from({ length: this.totalPages }, (_, index) => index + 1);
     this.currentPage = 1;
     this.updatePage();
   }
 
   calculateCustomerPagination() {
     this.customerTotalPages = Math.max(1, Math.ceil(this.filteredCustomerInvoices.length / this.customerPageSize));
+    this.customerPageNumbers = Array.from({ length: this.customerTotalPages }, (_, index) => index + 1);
     this.customerCurrentPage = 1;
     this.updateCustomerPage();
   }
@@ -168,14 +171,6 @@ export class InvoiceList implements OnInit {
 
   changeCustomerPageSize() {
     this.calculateCustomerPagination();
-  }
-
-  get pageNumbers(): number[] {
-    return Array.from({ length: this.totalPages }, (_, index) => index + 1);
-  }
-
-  get customerPageNumbers(): number[] {
-    return Array.from({ length: this.customerTotalPages }, (_, index) => index + 1);
   }
 
   nextPage() {
@@ -248,15 +243,8 @@ export class InvoiceList implements OnInit {
     this.showPreview = true;
     if (!invoice.phoneNumber) return;
 
-    this.clientService.getAllClients().subscribe({
-      next: clients => {
-        const phoneNumber = this.normalizePhone(invoice.phoneNumber);
-        const gstNumber = String(invoice.gstNumber || '').trim().toUpperCase();
-        const client = clients.find(item =>
-          this.normalizePhone(item.phoneNumber) === phoneNumber ||
-          (gstNumber && String(item.gstNumber || '').trim().toUpperCase() === gstNumber)
-        );
-        if (!client) return;
+    this.clientService.lookupBusinessClient(invoice.phoneNumber, invoice.gstNumber || '').subscribe({
+      next: client => {
         this.selectedInvoice = {
           ...this.selectedInvoice,
           userName: client.userName || this.selectedInvoice.userName,
@@ -404,7 +392,7 @@ export class InvoiceList implements OnInit {
       return;
     }
 
-    this.downloadTableReport(
+    void this.downloadTableReport(
       'Customer Invoice Report',
       ['ID', 'Customer', 'Service', 'Amount', 'Payment', 'Date'],
       this.filteredCustomerInvoices.map(invoice => [
@@ -425,7 +413,7 @@ export class InvoiceList implements OnInit {
       return;
     }
 
-    this.downloadTableReport(
+    void this.downloadTableReport(
       'Business Invoice Report',
       ['ID', 'Client', 'Phone', 'Total', 'Paid', 'Balance', 'Date'],
       this.filteredInvoices.map(invoice => [
@@ -441,7 +429,8 @@ export class InvoiceList implements OnInit {
     );
   }
 
-  private downloadTableReport(title: string, headers: string[], rows: any[][], filename: string) {
+  private async downloadTableReport(title: string, headers: string[], rows: any[][], filename: string) {
+    const { jsPDF } = await import('jspdf');
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -506,6 +495,10 @@ export class InvoiceList implements OnInit {
     return this.editingInvoice?._id === invoice._id
       ? this.calculateBalance(this.editingInvoice)
       : this.calculateBalance(invoice);
+  }
+
+  trackInvoice(_index: number, invoice: { _id: string }): string {
+    return invoice._id;
   }
 
   /* ---------- EDIT / DELETE ---------- */
