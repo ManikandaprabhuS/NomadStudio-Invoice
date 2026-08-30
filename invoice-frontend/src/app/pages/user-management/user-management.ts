@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
+import { AlertService } from '../service/alert.service';
 
 interface Account {
   _id: string;
@@ -25,11 +26,15 @@ export class UserManagement implements OnInit {
   users: Account[] = [];
   loading = true;
   saving = false;
+  deleting = false;
   error = '';
-  success = '';
+  pendingDeletion: Account | null = null;
   newUser = { userName: '', emailId: '', branchName: '', password: '' };
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private alertService: AlertService
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -51,15 +56,14 @@ export class UserManagement implements OnInit {
 
   createUser(): void {
     this.error = '';
-    this.success = '';
     if (this.saving) return;
 
     this.saving = true;
     this.http.post<Account>(this.usersUrl, this.newUser, { headers: this.authHeaders() }).subscribe({
       next: user => {
-        this.users = [user, ...this.users];
+        this.users = [{ ...user, _id: user._id }, ...this.users];
         this.newUser = { userName: '', emailId: '', branchName: '', password: '' };
-        this.success = 'User account created.';
+        this.alertService.success('User account created successfully.', 'Account created');
         this.saving = false;
       },
       error: error => {
@@ -69,18 +73,30 @@ export class UserManagement implements OnInit {
     });
   }
 
-  deleteUser(user: Account): void {
-    if (user.role !== 'user' || !confirm(`Delete the account for ${user.userName}?`)) return;
+  requestDeletion(user: Account): void {
+    if (user.role === 'user') this.pendingDeletion = user;
+  }
+
+  cancelDeletion(): void {
+    if (!this.deleting) this.pendingDeletion = null;
+  }
+
+  confirmDeletion(): void {
+    const user = this.pendingDeletion;
+    if (!user || this.deleting) return;
 
     this.error = '';
-    this.success = '';
+    this.deleting = true;
     this.http.delete<{ message: string }>(`${this.usersUrl}/${user._id}`, { headers: this.authHeaders() }).subscribe({
       next: result => {
         this.users = this.users.filter(account => account._id !== user._id);
-        this.success = result.message;
+        this.pendingDeletion = null;
+        this.deleting = false;
+        this.alertService.success(result.message, 'Account deleted');
       },
       error: error => {
         this.error = error.error?.message || 'Unable to delete user';
+        this.deleting = false;
       },
     });
   }
