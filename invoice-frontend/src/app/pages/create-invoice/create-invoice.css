@@ -219,7 +219,8 @@
   color: var(--text-secondary);
 }
 
-.input-field input {
+.input-field input,
+.input-field textarea {
   padding: 12px;
   border-radius: 10px;
   border: 1.5px solid var(--border-light);
@@ -228,7 +229,14 @@
   outline: none;
 }
 
-.input-field input:focus {
+.input-field textarea {
+  min-height: 72px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.input-field input:focus,
+.input-field textarea:focus {
   border-color: var(--primary-brown);
   box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1);
 }
@@ -387,7 +395,8 @@
   font-weight: 600;
 }
 
-.summary-row.received {
+.summary-row.received,
+.summary-row.payment-mode {
   padding: 16px;
   background: var(--bg-dashboard);
   border-radius: 12px;
@@ -396,7 +405,8 @@
   gap: 10px;
 }
 
-.summary-row.received label {
+.summary-row.received label,
+.summary-row.payment-mode label {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -520,4 +530,24 @@
   .btn-outline {
     width: 100%;
   }
+}
+
+@media (max-width: 576px) {
+  .create-invoice-wrapper { padding: 10px; }
+  .header-section { margin-bottom: 14px; }
+  .breadcrumb-nav { flex-wrap: wrap; font-size: 12px; }
+  .invoice-card { padding: 14px; gap: 26px; border-radius: 12px; }
+  .owner-details-card { padding: 14px; }
+  .owner-info { min-width: 0; }
+  .owner-info p { overflow-wrap: anywhere; }
+  .services-list tr { padding: 12px; }
+  .btn-add-line { min-height: 44px; }
+  .summary-input { width: 100%; min-height: 42px; }
+}
+
+@media (max-width: 375px) {
+  .create-invoice-wrapper { padding: 8px; }
+  .invoice-card { padding: 10px; }
+  .owner-details-card { align-items: flex-start; gap: 10px; }
+  .company-logo-placeholder { width: 40px; height: 40px; }
 }

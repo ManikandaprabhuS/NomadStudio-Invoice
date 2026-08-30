@@ -20,18 +20,26 @@
   <p class="message error" *ngIf="error">{{ error }}</p>
   <p class="message success" *ngIf="success">{{ success }}</p>
 
+  <div class="user-card user-skeleton" *ngIf="loading" aria-label="Loading user accounts">
+    <span class="skeleton skeleton-line short"></span>
+    <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3]">
+      <span class="skeleton skeleton-line" *ngFor="let cell of [1, 2, 3, 4]"></span>
+    </div>
+  </div>
+
   <div class="user-card" *ngIf="!loading">
     <h3>Accounts</h3>
-    <table *ngIf="users.length; else noUsers">
-      <thead><tr><th>Username</th><th>Branch</th><th>Email</th><th>Access</th><th>Actions</th></tr></thead>
-      <tbody>
-        <tr *ngFor="let user of users">
-          <td>{{ user.userName }}</td><td>{{ user.branchName || '—' }}</td><td>{{ user.emailId }}</td><td>{{ user.role }}</td>
-          <td><button *ngIf="user.role === 'user'" type="button" class="delete" (click)="deleteUser(user)">Delete</button></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="users-table-wrap" *ngIf="users.length; else noUsers">
+      <table>
+        <thead><tr><th>Username</th><th>Branch</th><th>Email</th><th>Access</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{ user.userName }}</td><td>{{ user.branchName || '—' }}</td><td>{{ user.emailId }}</td><td>{{ user.role }}</td>
+            <td><button *ngIf="user.role === 'user'" type="button" class="delete" (click)="deleteUser(user)">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <ng-template #noUsers><p>No accounts found.</p></ng-template>
   </div>
-  <p class="message" *ngIf="loading">Loading users...</p>
 </section>

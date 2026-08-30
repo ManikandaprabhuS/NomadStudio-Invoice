@@ -65,6 +65,22 @@
     font-weight: 600;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid transparent;
+    gap: 12px;
+}
+
+.nav-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.nav-text {
+    min-width: 0;
 }
 
 .nav-list a:hover {
@@ -129,4 +145,11 @@
     .mobile-only {
         display: block !important;
     }
+}
+
+@media (max-width: 480px) {
+    .sidebar { padding: 10px; }
+    .sidebar-inner { padding: 16px 8px; }
+    .nav-list { gap: 6px; }
+    .nav-list a { min-height: 44px; padding: 10px 16px; }
 }

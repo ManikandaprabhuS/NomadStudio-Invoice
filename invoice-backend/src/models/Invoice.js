@@ -10,10 +10,25 @@ const serviceSchema = new mongoose.Schema({
 
 const invoiceSchema = new mongoose.Schema(
   {
+    invoiceType: {
+      type: String,
+      enum: ['Business', 'Customer'],
+      default: 'Business',
+      required: true
+    },
     userName: { type: String, required: true },
     phoneNumber: { type: String, required: true },
-    gstNumber: { type: String, required: true, uppercase: true, trim: true },
+    gstNumber: {
+      type: String,
+      default: null,
+      uppercase: true,
+      trim: true,
+      required() {
+        return this.invoiceType === 'Business';
+      }
+    },
     emailId: { type: String, required: true, trim: true },
+    address: { type: String, trim: true },
 
     services: { type: [serviceSchema], required: true },
 
@@ -23,6 +38,11 @@ const invoiceSchema = new mongoose.Schema(
     roundOff: { type: Number, required: true },
     totalAmount: { type: Number, required: true },
     receivedAmount: { type: Number, required: true },
+    modeOfPayment: {
+      type: String,
+      required: true,
+      enum: ['Online', 'Cash']
+    },
     balanceAmount: { type: Number, required: true },
 
     ownerDetails: {

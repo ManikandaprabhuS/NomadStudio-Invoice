@@ -295,3 +295,20 @@
     border-top: 1px solid var(--border-light);
   }
 }
+
+@media (max-width: 576px) {
+  .expense-container { padding: 12px; }
+  .header-section { align-items: stretch; margin-bottom: 16px; }
+  .header-actions { width: 100%; padding-right: 0; }
+  .search-box { max-width: none; }
+  .expense-table tr.expense-row { margin-bottom: 16px; padding: 14px; }
+  .expense-table td { align-items: flex-start; gap: 16px; }
+  .expense-table td > :last-child { min-width: 0; max-width: 68%; overflow-wrap: anywhere; text-align: right; }
+  .action-buttons { max-width: 100% !important; }
+}
+
+@media (max-width: 375px) {
+  .expense-container { padding: 8px; }
+  .page-title { font-size: 21px; }
+  .expense-table tr.expense-row { padding: 12px; }
+}

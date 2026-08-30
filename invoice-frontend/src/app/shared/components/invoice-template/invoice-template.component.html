@@ -27,8 +27,9 @@
             <strong>Bill To:</strong>
             <p class="client-name">{{invoice.userName}}</p>
             <p>Contact No: {{invoice.phoneNumber}}</p>
-            <p>GST No: {{invoice.gstNumber || '-'}}</p>
+            <p *ngIf="invoice.invoiceType !== 'Customer'">GST No: {{invoice.gstNumber || '-'}}</p>
             <p>Email: {{invoice.emailId || '-'}}</p>
+            <p>Address: {{invoice.address || '-'}}</p>
         </div>
         <div class="col-right">
             <strong>Invoice Details:</strong>
@@ -104,6 +105,10 @@
             <div class="payment-row">
                 <span>Received:</span>
                 <span>{{invoice.receivedAmount | number:'1.2-2'}}</span>
+            </div>
+            <div class="payment-row">
+                <span>Payment Mode:</span>
+                <span>{{invoice.modeOfPayment || '-'}}</span>
             </div>
             <div class="payment-row">
                 <span>Balance:</span>

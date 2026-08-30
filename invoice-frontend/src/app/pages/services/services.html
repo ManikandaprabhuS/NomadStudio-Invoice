@@ -15,7 +15,12 @@
     </div>
   </form>
 
-  <div *ngIf="loading" class="state-message">Loading services...</div>
+  <div *ngIf="loading" class="service-skeleton" aria-label="Loading services">
+    <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3, 4]">
+      <span class="skeleton skeleton-line medium"></span>
+      <span class="skeleton skeleton-line short"></span>
+    </div>
+  </div>
 
   <div class="table-card" *ngIf="!loading && services.length">
     <table>

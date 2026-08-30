@@ -353,3 +353,22 @@
         border-top: 1px solid var(--border-light);
     }
 }
+
+@media (max-width: 576px) {
+    .clients-container { padding: 12px; }
+    .header-section { align-items: stretch; margin-bottom: 16px; }
+    .header-actions { width: 100%; padding-right: 0; }
+    .search-box { max-width: none; }
+    .client-table tr.client-row { margin-bottom: 16px; padding: 14px; }
+    .client-table td { align-items: flex-start; gap: 16px; }
+    .client-table td > :last-child { min-width: 0; max-width: 65%; overflow-wrap: anywhere; text-align: right; }
+    .action-buttons { justify-content: flex-end; max-width: 100% !important; }
+    .pagination-container { flex-wrap: wrap; gap: 10px; }
+    .btn-pagination { min-height: 42px; }
+}
+
+@media (max-width: 375px) {
+    .clients-container { padding: 8px; }
+    .page-title { font-size: 21px; }
+    .client-table tr.client-row { padding: 12px; }
+}

@@ -83,3 +83,10 @@
         font-size: 1.2em;
     }
 }
+
+@media (max-width: 375px) {
+    .nav-inner { padding: 0 12px; }
+    .menu-toggle { margin-right: 6px; padding: 8px; }
+    .logo img { height: 34px; margin-right: 8px; }
+    .studio-name { font-size: 1rem; }
+}

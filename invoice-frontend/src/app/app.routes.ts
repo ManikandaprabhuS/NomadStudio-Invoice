@@ -24,7 +24,8 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard , canActivate: [authGuard] },
       // add more pages here later
-      { path: 'invoices', component: CreateInvoice , canActivate: [authGuard] },
+      { path: 'invoices', component: CreateInvoice, data: { invoiceType: 'Business' }, canActivate: [authGuard] },
+      { path: 'customer-invoice', component: CreateInvoice, data: { invoiceType: 'Customer' }, canActivate: [authGuard] },
       { path: 'listinvoices', component: InvoiceList , canActivate: [authGuard]   },
       { path: 'clients', component: Clients , canActivate: [authGuard] },
       {path:'overview', component:Overview, canActivate: [authGuard]},

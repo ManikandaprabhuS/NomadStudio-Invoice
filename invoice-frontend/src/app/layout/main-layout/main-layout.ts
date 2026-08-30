@@ -1,4 +1,5 @@
 import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Navbar } from '../../shared/components/navbar/navbar';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
@@ -6,6 +7,7 @@ import { Sidebar } from '../../shared/components/sidebar/sidebar';
 @Component({
   selector: 'app-main-layout',
   imports: [
+    CommonModule,
     RouterOutlet,
     Navbar,
     Sidebar

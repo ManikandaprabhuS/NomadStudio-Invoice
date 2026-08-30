@@ -107,3 +107,17 @@
         opacity: 1;
     }
 }
+
+@media (max-width: 480px) {
+    .alert-container {
+        top: 12px;
+        right: 12px;
+        left: 12px;
+    }
+
+    .alert {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+    }
+}

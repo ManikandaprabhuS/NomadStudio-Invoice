@@ -136,6 +136,20 @@ tbody tr:last-child td {
   background: #fff;
 }
 
+.service-skeleton {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.service-skeleton .skeleton-table-row {
+  grid-template-columns: minmax(0, 1fr) 120px;
+}
+
 @media (max-width: 640px) {
   .services-container {
     padding: 16px;
@@ -152,4 +166,16 @@ tbody tr:last-child td {
   .action-buttons {
     flex-wrap: wrap;
   }
+
+  .table-card { overflow-x: auto; }
+  .table-card table { min-width: 460px; }
+  button { min-height: 42px; }
+  .service-skeleton { padding: 12px; }
+  .service-skeleton .skeleton-table-row { grid-template-columns: 1fr 80px; }
+}
+
+@media (max-width: 375px) {
+  .services-container { padding: 10px; }
+  .add-service-card,
+  .table-card { margin-top: 16px; padding: 12px; }
 }

@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Invoice } from '../service/invoice';
 import { CommonModule } from '@angular/common';
 import { AlertService } from '../service/alert.service';
@@ -14,18 +14,21 @@ import { Client } from '../service/client';
   templateUrl: './create-invoice.html',
   styleUrl: './create-invoice.css',
 })
-export class CreateInvoice implements OnInit {
+export class CreateInvoice implements OnInit, OnDestroy {
 
   serviceTypes: ServiceType[] = [];
-  businessClients: any[] = [];
-  clientsLoaded = false;
   clientLookupMessage = '';
+  private clientLookupTimer?: ReturnType<typeof setTimeout>;
+  private clientLookupRequestId = 0;
+  invoiceType: 'Business' | 'Customer' = 'Business';
 
   invoice = {
     userName: '',
     phoneNumber: '',
     gstNumber: '',
     emailId: '',
+    address: '',
+    invoiceType: 'Business',
     services: [
       {
         serviceType: '',
@@ -41,6 +44,7 @@ export class CreateInvoice implements OnInit {
     roundOff: 0,
     totalAmount: 0,
     receivedAmount: 0,
+    modeOfPayment: '',
     balanceAmount: 0,
     generalNotes: '',
     ownerDetails: {
@@ -58,25 +62,26 @@ export class CreateInvoice implements OnInit {
     private router: Router,
     private alertService: AlertService,
     private serviceCatalog: ServiceCatalog,
-    private clientService: Client
+    private clientService: Client,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
+    this.invoiceType = this.route.snapshot.data['invoiceType'] === 'Customer' ? 'Customer' : 'Business';
+    this.invoice.invoiceType = this.invoiceType;
+    if (!this.isBusinessInvoice) this.invoice.gstNumber = '';
     this.serviceCatalog.getServices().subscribe({
       next: services => this.serviceTypes = services,
       error: () => this.alertService.error('Failed to load services')
     });
-    this.clientService.getAllClients().subscribe({
-      next: clients => {
-        this.businessClients = clients;
-        this.clientsLoaded = true;
-        this.scheduleClientLookup();
-      },
-      error: () => {
-        this.clientsLoaded = true;
-        this.businessClients = [];
-      }
-    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.clientLookupTimer) clearTimeout(this.clientLookupTimer);
+  }
+
+  get isBusinessInvoice(): boolean {
+    return this.invoiceType === 'Business';
   }
 
   addService() {
@@ -120,25 +125,34 @@ export class CreateInvoice implements OnInit {
   }
 
   scheduleClientLookup() {
+    if (this.clientLookupTimer) clearTimeout(this.clientLookupTimer);
     this.clientLookupMessage = '';
     const phoneNumber = this.normalizePhone(this.invoice.phoneNumber);
-    const gstNumber = this.invoice.gstNumber.trim().toUpperCase();
+    const gstNumber = this.isBusinessInvoice ? this.invoice.gstNumber.trim().toUpperCase() : '';
     if (phoneNumber.length < 10 && gstNumber.length < 15) return;
 
-    const client = this.businessClients.find(item =>
-      (phoneNumber.length >= 10 && this.normalizePhone(item.phoneNumber) === phoneNumber) ||
-      (gstNumber.length === 15 && String(item.gstNumber || '').trim().toUpperCase() === gstNumber)
-    );
-
-    if (client) {
-      this.invoice.userName = client.userName || '';
-      this.invoice.phoneNumber = client.phoneNumber || this.invoice.phoneNumber;
-      this.invoice.gstNumber = client.gstNumber || this.invoice.gstNumber;
-      this.invoice.emailId = client.emailId || '';
-      this.clientLookupMessage = 'Existing client details loaded.';
-    } else if (this.clientsLoaded) {
-      this.clientLookupMessage = 'No matching client found. This client will be saved when the invoice is created.';
-    }
+    const requestId = ++this.clientLookupRequestId;
+    this.clientLookupTimer = setTimeout(() => {
+      this.clientService.lookupBusinessClient(this.invoice.phoneNumber, gstNumber).subscribe({
+        next: client => {
+          if (requestId !== this.clientLookupRequestId) return;
+          this.invoice.userName = client.userName || '';
+          this.invoice.phoneNumber = client.phoneNumber || this.invoice.phoneNumber;
+          this.invoice.gstNumber = this.isBusinessInvoice
+            ? client.gstNumber || this.invoice.gstNumber
+            : '';
+          this.invoice.emailId = client.emailId || '';
+          this.invoice.address = client.address || '';
+          this.clientLookupMessage = 'Existing client details loaded.';
+        },
+        error: error => {
+          if (requestId !== this.clientLookupRequestId) return;
+          this.clientLookupMessage = error.status === 404
+            ? 'No matching client found. Enter the details manually; they will be saved with this invoice.'
+            : 'Client lookup failed. You can still enter the client details manually.';
+        }
+      });
+    }, 300);
   }
 
   private normalizePhone(value: unknown): string {
@@ -169,7 +183,7 @@ export class CreateInvoice implements OnInit {
       return;
     }
 
-    if (!this.invoice.gstNumber || this.invoice.gstNumber.trim() === '') {
+    if (this.isBusinessInvoice && (!this.invoice.gstNumber || this.invoice.gstNumber.trim() === '')) {
       this.alertService.error('Please enter GST number');
       return;
     }
@@ -210,7 +224,13 @@ export class CreateInvoice implements OnInit {
       this.alertService.error('Please enter a valid received amount');
       return;
     }
-    this.invoice.gstNumber = this.invoice.gstNumber.trim().toUpperCase();
+    if (!this.invoice.modeOfPayment) {
+      this.alertService.error('Please select a payment mode');
+      return;
+    }
+    this.invoice.gstNumber = this.isBusinessInvoice
+      ? this.invoice.gstNumber.trim().toUpperCase()
+      : '';
     this.invoice.emailId = this.invoice.emailId.trim();
     this.recalculate();
     this.invoiceService.createInvoice(this.invoice)
@@ -226,7 +246,9 @@ export class CreateInvoice implements OnInit {
     this.invoice.userName = '';
     this.invoice.phoneNumber = '';
     this.invoice.gstNumber = '';
+    this.invoice.invoiceType = this.invoiceType;
     this.invoice.emailId = '';
+    this.invoice.address = '';
     this.invoice.services = [
       {
         serviceType: '',
@@ -242,6 +264,7 @@ export class CreateInvoice implements OnInit {
     this.invoice.roundOff = 0;
     this.invoice.totalAmount = 0;
     this.invoice.receivedAmount = 0;
+    this.invoice.modeOfPayment = '';
     this.invoice.balanceAmount = 0;
     this.invoice.generalNotes = '';
     this.clientLookupMessage = '';

@@ -10,6 +10,7 @@
 
 .login-box {
   width: 400px;
+  max-width: calc(100vw - 32px);
   padding: 60px 40px;
   border-radius: 20px;
   text-align: center;
@@ -118,4 +119,10 @@ button:hover {
 .link-group a:hover {
   color: #333;
   text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .login-container { padding: 16px; }
+  .login-box { width: 100%; padding: 36px 20px; border-radius: 16px; }
+  .logo { width: 82px; height: 82px; }
 }

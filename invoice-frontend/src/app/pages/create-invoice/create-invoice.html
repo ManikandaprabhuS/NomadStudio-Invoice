@@ -4,7 +4,7 @@
     <div class="breadcrumb-nav">
       <span class="root">Invoices</span>
       <span class="separator">/</span>
-      <span class="active">Create New Invoice</span>
+      <span class="active">Create New {{ invoiceType }} Invoice</span>
     </div>
     <div class="header-actions">
       <button class="btn-outline" (click)="goToList()">View All Invoices</button>
@@ -56,11 +56,17 @@
               <input type="email" [(ngModel)]="invoice.emailId" placeholder="Enter client email address" required />
             </div>
           </div>
-          <div class="field-row">
+          <div class="field-row" *ngIf="isBusinessInvoice">
             <div class="input-field">
               <label>GST Number <span class="required">*</span></label>
               <input type="text" [(ngModel)]="invoice.gstNumber" placeholder="Enter GST number" required
                 (ngModelChange)="scheduleClientLookup()" maxlength="15" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="input-field">
+              <label>Address</label>
+              <textarea [(ngModel)]="invoice.address" placeholder="Enter client address"></textarea>
             </div>
           </div>
           <p class="client-lookup-message" *ngIf="clientLookupMessage">{{ clientLookupMessage }}</p>
@@ -151,6 +157,14 @@
           <label>Amount Received (₹)</label>
           <input type="number" class="summary-input" [(ngModel)]="invoice.receivedAmount" (input)="recalculate()"
             required #receivedAmount />
+        </div>
+        <div class="summary-row payment-mode">
+          <label>Payment Mode</label>
+          <select class="summary-input" [(ngModel)]="invoice.modeOfPayment" required>
+            <option value="" disabled>Select payment mode</option>
+            <option value="Online">Online</option>
+            <option value="Cash">Cash</option>
+          </select>
         </div>
         <div class="summary-row balance-due">
           <span class="label">Balance Due</span>

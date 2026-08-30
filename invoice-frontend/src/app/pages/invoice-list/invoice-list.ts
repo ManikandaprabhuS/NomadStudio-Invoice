@@ -23,6 +23,7 @@ export class InvoiceList implements OnInit {
   paginatedInvoices: any[] = [];
   customerInvoices: QuickAddIncomeRecord[] = [];
   filteredCustomerInvoices: QuickAddIncomeRecord[] = [];
+  paginatedCustomerInvoices: QuickAddIncomeRecord[] = [];
 
   selectedInvoice: any = null;
   showPreview = false;
@@ -35,10 +36,16 @@ export class InvoiceList implements OnInit {
   showCustomerFilters = false;
   selectedCount = 0;
   editingInvoice: any = null;
+  loadingInvoices = true;
+  loadingCustomerInvoices = true;
 
   pageSize = 4;
   currentPage = 1;
   totalPages = 1;
+  customerPageSize = 4;
+  customerCurrentPage = 1;
+  customerTotalPages = 1;
+  readonly pageSizeOptions = [4, 10, 20];
 
   constructor(
     private invoiceService: Invoice,
@@ -53,16 +60,22 @@ export class InvoiceList implements OnInit {
   }
 
   loadCustomerInvoices() {
+    this.loadingCustomerInvoices = true;
     this.quickAddIncomeService.getIncomes().subscribe({
       next: records => {
         this.customerInvoices = records;
         this.applyCustomerFilter();
+        this.loadingCustomerInvoices = false;
       },
-      error: () => this.alertService.error('Failed to load customer invoices')
+      error: () => {
+        this.loadingCustomerInvoices = false;
+        this.alertService.error('Failed to load customer invoices');
+      }
     });
   }
 
   loadInvoices() {
+    this.loadingInvoices = true;
     this.invoiceService.getInvoices().then((res: any[]) => {
       this.invoices = res.map(inv => ({
         ...inv,
@@ -71,6 +84,10 @@ export class InvoiceList implements OnInit {
       }));
       this.filteredInvoices = [...this.invoices];
       this.calculatePagination();
+    }).catch(() => {
+      this.alertService.error('Failed to load business invoices');
+    }).finally(() => {
+      this.loadingInvoices = false;
     });
   }
 
@@ -102,6 +119,7 @@ export class InvoiceList implements OnInit {
         this.formatLocalDateKey(invoice.createdAt) === this.customerDateFilter;
       return matchesPayment && matchesDate;
     });
+    this.calculateCustomerPagination();
   }
 
   clearCustomerFilters() {
@@ -116,15 +134,61 @@ export class InvoiceList implements OnInit {
     this.updatePage();
   }
 
+  calculateCustomerPagination() {
+    this.customerTotalPages = Math.max(1, Math.ceil(this.filteredCustomerInvoices.length / this.customerPageSize));
+    this.customerCurrentPage = 1;
+    this.updateCustomerPage();
+  }
+
   updatePage() {
     const start = (this.currentPage - 1) * this.pageSize;
     this.paginatedInvoices = this.filteredInvoices.slice(start, start + this.pageSize);
+  }
+
+  updateCustomerPage() {
+    const start = (this.customerCurrentPage - 1) * this.customerPageSize;
+    this.paginatedCustomerInvoices = this.filteredCustomerInvoices.slice(start, start + this.customerPageSize);
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePage();
+  }
+
+  goToCustomerPage(page: number) {
+    if (page < 1 || page > this.customerTotalPages) return;
+    this.customerCurrentPage = page;
+    this.updateCustomerPage();
+  }
+
+  changePageSize() {
+    this.calculatePagination();
+  }
+
+  changeCustomerPageSize() {
+    this.calculateCustomerPagination();
+  }
+
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, index) => index + 1);
+  }
+
+  get customerPageNumbers(): number[] {
+    return Array.from({ length: this.customerTotalPages }, (_, index) => index + 1);
   }
 
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
       this.updatePage();
+    }
+  }
+
+  nextCustomerPage() {
+    if (this.customerCurrentPage < this.customerTotalPages) {
+      this.customerCurrentPage++;
+      this.updateCustomerPage();
     }
   }
   printInvoice(){
@@ -135,6 +199,13 @@ export class InvoiceList implements OnInit {
     if (this.currentPage > 1) {
       this.currentPage--;
       this.updatePage();
+    }
+  }
+
+  prevCustomerPage() {
+    if (this.customerCurrentPage > 1) {
+      this.customerCurrentPage--;
+      this.updateCustomerPage();
     }
   }
 
@@ -191,7 +262,8 @@ export class InvoiceList implements OnInit {
           userName: client.userName || this.selectedInvoice.userName,
           phoneNumber: client.phoneNumber || this.selectedInvoice.phoneNumber,
           gstNumber: client.gstNumber || this.selectedInvoice.gstNumber,
-          emailId: client.emailId || this.selectedInvoice.emailId
+          emailId: client.emailId || this.selectedInvoice.emailId,
+          address: client.address || this.selectedInvoice.address
         };
       },
       error: () => { }

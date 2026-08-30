@@ -292,6 +292,7 @@ export class Overview implements OnInit {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
 
 
         plugins: {

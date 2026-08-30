@@ -6,3 +6,56 @@ body {
     overflow: hidden;
     /* 🔥 VERY IMPORTANT */
 }
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Shared API loading placeholders */
+.skeleton {
+    display: block;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #eee9e4 25%, #f8f5f2 50%, #eee9e4 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.skeleton-line { height: 12px; }
+.skeleton-line.short { width: 42%; }
+.skeleton-line.medium { width: 68%; }
+
+.skeleton-table-list {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+}
+
+.skeleton-table-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    gap: 18px;
+    min-height: 62px;
+    padding: 16px;
+    border: 1px solid #eee8e2;
+    border-radius: 12px;
+    background: #fff;
+}
+
+@keyframes skeleton-loading {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton { animation: none; }
+}
+
+@media (max-width: 576px) {
+    .skeleton-table-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+}

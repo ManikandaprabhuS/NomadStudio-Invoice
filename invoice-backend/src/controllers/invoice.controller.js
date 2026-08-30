@@ -1,6 +1,66 @@
 const Invoice = require('../models/Invoice');
 const User = require('../models/User');
 
+const normalizePhone = value => {
+  const digits = String(value || '').replace(/\D/g, '');
+  return digits.length > 10 ? digits.slice(-10) : digits;
+};
+
+const saveClientDetails = async invoice => {
+  const phoneLookupKey = normalizePhone(invoice.phoneNumber);
+  const gstNumber = String(invoice.gstNumber || '').trim().toUpperCase();
+  const directMatches = [];
+  if (phoneLookupKey) directMatches.push({ phoneLookupKey });
+  if (invoice.phoneNumber) directMatches.push({ phoneNumber: invoice.phoneNumber });
+  if (gstNumber) directMatches.push({ gstNumber });
+
+  let client = directMatches.length ? await User.findOne({ $or: directMatches }) : null;
+  if (!client && phoneLookupKey) {
+    const legacyClients = await User.find({ phoneNumber: { $exists: true, $ne: '' } });
+    client = legacyClients.find(item => normalizePhone(item.phoneNumber) === phoneLookupKey) || null;
+  }
+
+  const clientDetails = {
+    userName: invoice.userName,
+    phoneNumber: invoice.phoneNumber,
+    phoneLookupKey,
+    emailId: invoice.emailId || '',
+    address: invoice.address || ''
+  };
+
+  const clientUpdate = { $set: clientDetails };
+  if (invoice.invoiceType === 'Customer') {
+    // Do not erase a GST number already known for a returning business client.
+    // New clients created here explicitly store GST as null.
+    if (!client) clientUpdate.$setOnInsert = { gstNumber: null };
+  } else {
+    clientUpdate.$set.gstNumber = gstNumber;
+  }
+
+  const clientFilter = client?._id
+    ? { _id: client._id }
+    : phoneLookupKey
+      ? { phoneLookupKey }
+      : { gstNumber };
+
+  const savedClient = await User.findOneAndUpdate(
+    clientFilter,
+    clientUpdate,
+    {
+      new: true,
+      upsert: true,
+      runValidators: true,
+      setDefaultsOnInsert: true
+    }
+  );
+
+  if (!savedClient) {
+    throw new Error('Client details could not be saved');
+  }
+
+  return savedClient;
+};
+
 const roundCurrency = value => Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 
 const roundFinalAmount = value => {
@@ -41,23 +101,18 @@ const calculateInvoiceAmounts = invoice => {
 };
 
 const addClientDetails = async invoices => {
-  const phoneNumbers = invoices.map(invoice => invoice.phoneNumber).filter(Boolean);
-  const gstNumbers = invoices.map(invoice => invoice.gstNumber).filter(Boolean);
-  const clients = await User.find({
-    $or: [
-      { phoneNumber: { $in: phoneNumbers } },
-      { gstNumber: { $in: gstNumbers } }
-    ]
-  }).lean();
-  const clientsByPhone = new Map(clients.map(client => [client.phoneNumber, client]));
+  const clients = await User.find({}).lean();
+  const clientsByPhone = new Map(clients.map(client => [normalizePhone(client.phoneNumber), client]));
   const clientsByGst = new Map(clients.map(client => [client.gstNumber, client]));
 
   return invoices.map(invoice => {
-    const client = clientsByPhone.get(invoice.phoneNumber) || clientsByGst.get(invoice.gstNumber);
+    const client = clientsByPhone.get(normalizePhone(invoice.phoneNumber)) || clientsByGst.get(invoice.gstNumber);
     return {
       ...invoice,
-      gstNumber: invoice.gstNumber || client?.gstNumber || '',
-      emailId: invoice.emailId || client?.emailId || ''
+      invoiceType: invoice.invoiceType || 'Business',
+      gstNumber: invoice.invoiceType === 'Customer' ? null : invoice.gstNumber || client?.gstNumber || '',
+      emailId: invoice.emailId || client?.emailId || '',
+      address: invoice.address || client?.address || ''
     };
   });
 };
@@ -67,41 +122,35 @@ exports.createInvoice = async (req, res) => {
   try {
     console.log('[CREATE INVOICE] Payload:', req.body); // ✅ log input
     const invoice = calculateInvoiceAmounts({ ...req.body });
+    invoice.invoiceType = invoice.invoiceType === 'Customer' ? 'Customer' : 'Business';
 
     // minimal validation
     if (!invoice.services || invoice.services.length === 0) {
       console.log('[CREATE INVOICE] Services Missing:', req.body); // ✅ log input
       return res.status(400).json({ message: 'Services required' });
     }
-    if (!invoice.userName?.trim() || !invoice.phoneNumber?.trim() ||
-      !invoice.gstNumber?.trim() || !invoice.emailId?.trim()) {
+    if (!invoice.userName?.trim() || !invoice.phoneNumber?.trim() || !invoice.emailId?.trim()) {
       return res.status(400).json({
-        message: 'Client name, phone number, GST number and email ID are required'
+        message: 'Client name, phone number and email ID are required'
       });
+    }
+    if (invoice.invoiceType === 'Business' && !invoice.gstNumber?.trim()) {
+      return res.status(400).json({ message: 'GST number is required for a Business Invoice' });
+    }
+    if (!['Online', 'Cash'].includes(invoice.modeOfPayment)) {
+      return res.status(400).json({ message: 'Payment mode must be Online or Cash' });
     }
 
     invoice.userName = invoice.userName.trim();
     invoice.phoneNumber = invoice.phoneNumber.trim();
-    invoice.gstNumber = invoice.gstNumber.trim().toUpperCase();
+    invoice.gstNumber = invoice.invoiceType === 'Customer'
+      ? null
+      : invoice.gstNumber.trim().toUpperCase();
     invoice.emailId = invoice.emailId.trim();
+    invoice.address = invoice.address?.trim() || '';
 
-    await User.findOneAndUpdate(
-      {
-        $or: [
-          { phoneNumber: invoice.phoneNumber },
-          { gstNumber: invoice.gstNumber }
-        ]
-      },
-      {
-        $set: {
-          userName: invoice.userName,
-          phoneNumber: invoice.phoneNumber,
-          gstNumber: invoice.gstNumber,
-          emailId: invoice.emailId
-        }
-      },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
+    const savedClient = await saveClientDetails(invoice);
+    console.log('[CREATE INVOICE] Client details saved:', savedClient._id);
     const savedInvoice = await Invoice.create(invoice);
     console.log('[CREATE INVOICE] Created:', savedInvoice); // ✅ log output
     res.status(201).json(savedInvoice);
@@ -170,24 +219,10 @@ exports.updateInvoice = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    if (invoice.userName && invoice.phoneNumber && invoice.gstNumber && invoice.emailId) {
-      await User.findOneAndUpdate(
-        {
-          $or: [
-            { phoneNumber: invoice.phoneNumber },
-            { gstNumber: invoice.gstNumber }
-          ]
-        },
-        {
-          $set: {
-            userName: invoice.userName,
-            phoneNumber: invoice.phoneNumber,
-            gstNumber: invoice.gstNumber,
-            emailId: invoice.emailId
-          }
-        },
-        { new: true, upsert: true, setDefaultsOnInsert: true }
-      );
+    const invoiceType = invoice.invoiceType || 'Business';
+    if (invoice.userName && invoice.phoneNumber && invoice.emailId &&
+      (invoiceType === 'Customer' || invoice.gstNumber)) {
+      await saveClientDetails(invoice);
     }
     
     res.json(invoice);

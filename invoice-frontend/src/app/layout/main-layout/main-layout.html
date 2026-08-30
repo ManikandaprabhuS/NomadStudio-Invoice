@@ -2,6 +2,8 @@
 
 <div class="layout">
     <app-sidebar class="sidebar" [class.open]="isSidebarOpen" (close)="closeSidebar()"></app-sidebar>
+    <button class="sidebar-backdrop" type="button" aria-label="Close navigation" *ngIf="isSidebarOpen"
+        (click)="closeSidebar()"></button>
 
     <main class="content">
         <router-outlet></router-outlet>

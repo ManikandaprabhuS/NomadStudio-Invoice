@@ -12,4 +12,19 @@ table { width: 100%; border-collapse: collapse; }
 th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
 th { color: #555; }
 .message { margin-top: 16px; }.error { color: #b42318; }.success { color: #027a48; }
-@media (max-width: 640px) { .users-container { padding: 18px; }.form-grid { grid-template-columns: 1fr; } table { font-size: .9rem; } th, td { padding: 8px; } }
+.users-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.users-table-wrap table { min-width: 680px; }
+.user-skeleton { display: grid; gap: 14px; }
+.user-skeleton .skeleton-table-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 640px) {
+  .users-container { padding: 18px; }
+  .form-grid { grid-template-columns: 1fr; }
+  table { font-size: .9rem; }
+  th, td { padding: 8px; }
+  .user-card { padding: 16px; }
+  button { min-height: 42px; }
+}
+@media (max-width: 375px) {
+  .users-container { padding: 10px; }
+  .user-card { margin-top: 16px; padding: 12px; }
+}

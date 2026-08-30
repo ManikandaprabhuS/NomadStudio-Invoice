@@ -10,9 +10,10 @@
     </div>
   </div>
 
-  <div *ngIf="loading" class="loading-state">
-    <div class="spinner"></div>
-    <p>Fetching expense data...</p>
+  <div *ngIf="loading" class="skeleton-table-list" aria-label="Loading expenses">
+    <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3, 4, 5]">
+      <span class="skeleton skeleton-line" *ngFor="let cell of [1, 2, 3, 4]"></span>
+    </div>
   </div>
 
   <div class="table-container" *ngIf="!loading && filteredExpenses.length > 0">

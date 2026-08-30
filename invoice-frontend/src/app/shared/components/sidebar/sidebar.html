@@ -2,42 +2,75 @@
     <div class="sidebar-inner">
         <ul class="nav-list">
             <li>
-                <a routerLink="/overview" routerLinkActive="active">
+                <a routerLink="/overview" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                    </svg>
                     <span class="nav-text">Overview</span>
                 </a>
             </li>
             <li>
-                <a routerLink="/invoices" routerLinkActive="active">
+                <a routerLink="/invoices" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 2h9l4 4v16H6z"></path><path d="M15 2v5h4M9 12h7M9 16h7"></path>
+                    </svg>
                     <span class="nav-text">Business Invoice</span>
                 </a>
             </li>
             <li>
-                <a routerLink="/listinvoices" routerLinkActive="active">
+                <a routerLink="/customer-invoice" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 2h11l3 3v17H5zM16 2v4h3"></path><circle cx="12" cy="11" r="2.5"></circle><path d="M8.5 18c.7-2 2-3 3.5-3s2.8 1 3.5 3"></path>
+                    </svg>
+                    <span class="nav-text">Customer Invoice</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/listinvoices" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V2h6v2M9 9h6M9 13h6M9 17h4"></path>
+                    </svg>
                     <span class="nav-text">Invoice List</span>
                 </a>
             </li>
             <li>
-                <a routerLink="/clients" routerLinkActive="active">
+                <a routerLink="/clients" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="9" r="2"></circle><path d="M3 20c.5-4 2.6-6 6-6s5.5 2 6 6M15 15c3 0 4.7 1.7 5 5"></path>
+                    </svg>
                     <span class="nav-text">Client Details</span>
                 </a>
             </li>
             <li>
-                <a routerLink="/expense" routerLinkActive="active">
+                <a routerLink="/expense" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 6h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M3 7l13-4v3M16 11h5v5h-5a2.5 2.5 0 0 1 0-5z"></path>
+                    </svg>
                     <span class="nav-text">Expense Details</span>
                 </a>
             </li>
             <li>
-                <a routerLink="/services" routerLinkActive="active">
+                <a routerLink="/services" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M14.5 6.5a4 4 0 0 0-5-5l2.2 2.2-3 3L6.5 4.5a4 4 0 0 0 5 5L19 17a2 2 0 1 1-3 3l-7.5-7.5"></path>
+                    </svg>
                     <span class="nav-text">Services</span>
                 </a>
             </li>
             <li *ngIf="isAdmin">
-                <a routerLink="/users" routerLinkActive="active">
+                <a routerLink="/users" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2l8 3v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V5z"></path><circle cx="12" cy="9" r="2.5"></circle><path d="M8.5 16c.7-2 2-3 3.5-3s2.8 1 3.5 3"></path>
+                    </svg>
                     <span class="nav-text">User Management</span>
                 </a>
             </li>
             <li>
-                <a routerLink="/support" routerLinkActive="active">
+                <a routerLink="/support" routerLinkActive="active" (click)="close.emit()">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 13v-2a8 8 0 0 1 16 0v2M4 13H2v5h4v-5zM20 13h2v5h-4v-5zM18 19c-1 2-3 2-5 2"></path>
+                    </svg>
                     <span class="nav-text">Support</span>
                 </a>
             </li>

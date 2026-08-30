@@ -20,9 +20,24 @@
     </div>
   </div>
 
-  <!-- Loading Indicator -->
-  <div *ngIf="loading" class="loading-state">
-    <p>Loading your financial snapshot...</p>
+  <!-- Loading placeholders -->
+  <div *ngIf="loading" class="overview-skeleton" aria-label="Loading dashboard">
+    <div class="skeleton-stats-grid">
+      <div class="skeleton-stat-card" *ngFor="let item of [1, 2, 3, 4]">
+        <span class="skeleton skeleton-line medium"></span>
+        <span class="skeleton skeleton-value"></span>
+      </div>
+    </div>
+    <div class="skeleton-overview-bottom">
+      <div class="skeleton skeleton-chart"></div>
+      <div class="skeleton-form-card">
+        <span class="skeleton skeleton-line medium"></span>
+        <span class="skeleton skeleton-input"></span>
+        <span class="skeleton skeleton-input"></span>
+        <span class="skeleton skeleton-button"></span>
+        <span class="skeleton skeleton-input tall"></span>
+      </div>
+    </div>
   </div>
 
   <!-- KPI Metrics Grid -->

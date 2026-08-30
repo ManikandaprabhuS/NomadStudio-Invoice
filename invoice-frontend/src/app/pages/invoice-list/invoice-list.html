@@ -11,10 +11,15 @@
           <p>Quick Add Income walk-in and customer entries</p>
         </div>
         <div class="section-actions">
-          <button class="filter-toggle-btn" type="button" (click)="showCustomerFilters = !showCustomerFilters">
+          <button class="filter-toggle-btn" type="button" [attr.aria-expanded]="showCustomerFilters"
+            (click)="showCustomerFilters = !showCustomerFilters">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
             Filter
           </button>
-          <button class="section-export-btn" type="button" (click)="generateCustomerReport()">Generate Report</button>
+          <button class="section-export-btn" type="button" (click)="generateCustomerReport()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4M5 21h14"></path></svg>
+            Generate Report
+          </button>
         </div>
       </div>
 
@@ -34,7 +39,13 @@
         <button class="clear-filter-btn" type="button" (click)="clearCustomerFilters()">Clear Filters</button>
       </div>
 
-      <div class="table-container" *ngIf="filteredCustomerInvoices.length; else noCustomerInvoices">
+      <div class="skeleton-table-list" *ngIf="loadingCustomerInvoices" aria-label="Loading customer invoices">
+        <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3, 4]">
+          <span class="skeleton skeleton-line" *ngFor="let cell of [1, 2, 3, 4, 5]"></span>
+        </div>
+      </div>
+
+      <div class="table-container" *ngIf="!loadingCustomerInvoices && filteredCustomerInvoices.length">
         <table class="invoice-table customer-invoice-table">
           <thead>
             <tr>
@@ -48,7 +59,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="invoice-row" *ngFor="let invoice of filteredCustomerInvoices">
+            <tr class="invoice-row" *ngFor="let invoice of paginatedCustomerInvoices">
               <td data-label="ID">{{ invoice._id | slice:-5 }}</td>
               <td data-label="Customer"><span class="client-name">{{ invoice.clientName }}</span></td>
               <td data-label="Service">{{ invoice.serviceType }}</td>
@@ -63,11 +74,28 @@
             </tr>
           </tbody>
         </table>
+
+        <div class="pagination-container" aria-label="Customer invoice pagination">
+          <button type="button" (click)="prevCustomerPage()" [disabled]="customerCurrentPage === 1"
+            class="btn-pagination pagination-nav">Previous</button>
+          <div class="page-numbers">
+            <button type="button" *ngFor="let page of customerPageNumbers" class="page-number"
+              [class.active]="page === customerCurrentPage" (click)="goToCustomerPage(page)">{{ page }}</button>
+          </div>
+          <button type="button" (click)="nextCustomerPage()" [disabled]="customerCurrentPage === customerTotalPages"
+            class="btn-pagination pagination-nav">Next</button>
+          <label class="page-size-control">
+            <span class="sr-only">Customer invoices per page</span>
+            <select [(ngModel)]="customerPageSize" (ngModelChange)="changeCustomerPageSize()">
+              <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} / page</option>
+            </select>
+          </label>
+        </div>
       </div>
 
-      <ng-template #noCustomerInvoices>
-        <div class="empty-table">No Quick Add Income customer entries found.</div>
-      </ng-template>
+      <div class="empty-table" *ngIf="!loadingCustomerInvoices && !filteredCustomerInvoices.length">
+        No Quick Add Income customer entries found.
+      </div>
     </section>
 
     <section class="invoice-section-card">
@@ -77,14 +105,26 @@
           <p>Invoices created from the business invoice form</p>
         </div>
         <div class="section-actions">
-          <input class="table-filter business-table-filter" placeholder="Search with Client Name or Phone Number."
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="applyFilter()" />
-          <button class="section-export-btn" type="button" (click)="generateBusinessReport()">Generate Report</button>
+          <label class="search-field">
+            <span class="sr-only">Search business invoices</span>
+            <input class="table-filter business-table-filter" placeholder="Search with Client Name or Phone Number."
+              [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" />
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16.5 16.5 4 4"></path></svg>
+          </label>
+          <button class="section-export-btn" type="button" (click)="generateBusinessReport()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4M5 21h14"></path></svg>
+            Generate Report
+          </button>
         </div>
       </div>
 
-      <div class="table-container" *ngIf="filteredInvoices.length; else noBusinessInvoices">
+      <div class="skeleton-table-list" *ngIf="loadingInvoices" aria-label="Loading business invoices">
+        <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3, 4]">
+          <span class="skeleton skeleton-line" *ngFor="let cell of [1, 2, 3, 4, 5]"></span>
+        </div>
+      </div>
+
+      <div class="table-container" *ngIf="!loadingInvoices && filteredInvoices.length">
         <table class="invoice-table">
           <thead>
             <tr>
@@ -144,16 +184,27 @@
           </tbody>
         </table>
 
-        <div class="pagination-container" *ngIf="totalPages > 1">
-          <button (click)="prevPage()" [disabled]="currentPage === 1" class="btn-pagination">Previous</button>
-          <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-          <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="btn-pagination">Next</button>
+        <div class="pagination-container" aria-label="Business invoice pagination">
+          <button type="button" (click)="prevPage()" [disabled]="currentPage === 1"
+            class="btn-pagination pagination-nav">Previous</button>
+          <div class="page-numbers">
+            <button type="button" *ngFor="let page of pageNumbers" class="page-number"
+              [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+          </div>
+          <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
+            class="btn-pagination pagination-nav">Next</button>
+          <label class="page-size-control">
+            <span class="sr-only">Business invoices per page</span>
+            <select [(ngModel)]="pageSize" (ngModelChange)="changePageSize()">
+              <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} / page</option>
+            </select>
+          </label>
         </div>
       </div>
 
-      <ng-template #noBusinessInvoices>
-        <div class="empty-table">No business invoices found.</div>
-      </ng-template>
+      <div class="empty-table" *ngIf="!loadingInvoices && !filteredInvoices.length">
+        No business invoices found.
+      </div>
     </section>
   </div>
 </div>
