@@ -11,11 +11,12 @@
                 <img src="assets/logo.png" alt="Nomad Studio" class="logo-img" />
                 <span class="company-name">Nomad studio</span>
             </div>
-            <div class="company-details" *ngIf="invoice.ownerDetails">
-                <p><strong>{{invoice.ownerDetails.ownerName}}</strong></p>
-                <p>{{invoice.ownerDetails.address}}</p>
-                <p>Phone: {{invoice.ownerDetails.phoneNumber}}</p>
+            <div class="company-details">
+                <p><strong>{{invoice.ownerDetails?.ownerName || 'Suriya'}}</strong></p>
+                <p>{{invoice.ownerDetails?.address || 'Dharapuram Road, Oddanchatram-624619, Tamil Nadu'}}</p>
+                <p>Phone: 8015534983, 7598204583</p>
                 <p>Email: nomadstudioodc@gmail.com</p>
+                <p>GST No: 33KXVPS2471D1ZX</p>
             </div>
         </div>
     </div>
@@ -26,6 +27,8 @@
             <strong>Bill To:</strong>
             <p class="client-name">{{invoice.userName}}</p>
             <p>Contact No: {{invoice.phoneNumber}}</p>
+            <p>GST No: {{invoice.gstNumber || '-'}}</p>
+            <p>Email: {{invoice.emailId || '-'}}</p>
         </div>
         <div class="col-right">
             <strong>Invoice Details:</strong>
@@ -69,11 +72,23 @@
             <tfoot>
                 <tr>
                     <td colspan="5" class="text-right"><strong>Sub Total</strong></td>
-                    <td class="text-right">{{invoice.totalAmount | number:'1.2-2'}}</td>
+                    <td class="text-right">{{displaySubTotal | number:'1.2-2'}}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>CGST (9%)</strong></td>
+                    <td class="text-right">{{displayCgst | number:'1.2-2'}}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>SGST (9%)</strong></td>
+                    <td class="text-right">{{displaySgst | number:'1.2-2'}}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>Round Off</strong></td>
+                    <td class="text-right">{{displayRoundOff | number:'1.2-2'}}</td>
                 </tr>
                 <tr class="total-row-highlight">
                     <td colspan="5" class="text-right"><strong>Total</strong></td>
-                    <td class="text-right"><strong>{{invoice.totalAmount | number:'1.2-2'}}</strong></td>
+                    <td class="text-right"><strong>{{displayTotal | number:'1.2-2'}}</strong></td>
                 </tr>
             </tfoot>
         </table>

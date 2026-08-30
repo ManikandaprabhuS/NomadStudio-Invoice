@@ -7,6 +7,7 @@ import { InvoiceTemplateComponent } from '../../shared/components/invoice-templa
 import { AlertService } from '../service/alert.service';
 import { QuickAddIncomeRecord, QuickAddIncomeService } from '../service/quick-add-income';
 import { jsPDF } from 'jspdf';
+import { Client } from '../service/client';
 
 @Component({
   selector: 'app-invoice-list',
@@ -42,7 +43,8 @@ export class InvoiceList implements OnInit {
   constructor(
     private invoiceService: Invoice,
     private quickAddIncomeService: QuickAddIncomeService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private clientService: Client
   ) { }
 
   ngOnInit(): void {
@@ -151,9 +153,54 @@ export class InvoiceList implements OnInit {
     this.showPreview = false;
   }
 
+  savePreviewClientDetails() {
+    if (!this.selectedInvoice) return;
+    const gstNumber = String(this.selectedInvoice.gstNumber || '').trim().toUpperCase();
+    const emailId = String(this.selectedInvoice.emailId || '').trim();
+    if (!gstNumber || !emailId) {
+      this.alertService.error('GST number and email ID are required');
+      return;
+    }
+
+    const updatedInvoice = { ...this.selectedInvoice, gstNumber, emailId };
+    this.invoiceService.updateInvoice(updatedInvoice._id, updatedInvoice)
+      .then(savedInvoice => {
+        this.selectedInvoice = { ...savedInvoice };
+        this.alertService.success('Client details saved successfully');
+        this.loadInvoices();
+      })
+      .catch(() => this.alertService.error('Failed to save client details'));
+  }
+
   viewBusinessInvoice(invoice: any) {
-    this.selectedInvoice = invoice;
+    this.selectedInvoice = { ...invoice };
     this.showPreview = true;
+    if (!invoice.phoneNumber) return;
+
+    this.clientService.getAllClients().subscribe({
+      next: clients => {
+        const phoneNumber = this.normalizePhone(invoice.phoneNumber);
+        const gstNumber = String(invoice.gstNumber || '').trim().toUpperCase();
+        const client = clients.find(item =>
+          this.normalizePhone(item.phoneNumber) === phoneNumber ||
+          (gstNumber && String(item.gstNumber || '').trim().toUpperCase() === gstNumber)
+        );
+        if (!client) return;
+        this.selectedInvoice = {
+          ...this.selectedInvoice,
+          userName: client.userName || this.selectedInvoice.userName,
+          phoneNumber: client.phoneNumber || this.selectedInvoice.phoneNumber,
+          gstNumber: client.gstNumber || this.selectedInvoice.gstNumber,
+          emailId: client.emailId || this.selectedInvoice.emailId
+        };
+      },
+      error: () => { }
+    });
+  }
+
+  private normalizePhone(value: unknown): string {
+    const digits = String(value || '').replace(/\D/g, '');
+    return digits.length > 10 ? digits.slice(-10) : digits;
   }
 
   viewCustomerInvoice(invoice: QuickAddIncomeRecord) {

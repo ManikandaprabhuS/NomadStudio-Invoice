@@ -1,0 +1,72 @@
+<div class="create-client-container">
+    <div class="client-card">
+        <div class="card-header">
+            <h2 class="page-title">Add New Client</h2>
+            <p class="subtitle">Complete the information below to register a new client</p>
+        </div>
+
+        <form #clientForm="ngForm" (ngSubmit)="saveClient()">
+            <div class="form-grid">
+                <!-- Name -->
+                <div class="form-group full-width">
+                    <label>Full Name *</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" name="userName" [(ngModel)]="client.userName" placeholder="e.g. John Doe"
+                            required />
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group half-width">
+                    <label>Phone Number</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📞</span>
+                        <input type="tel" name="phoneNumber" [(ngModel)]="client.phoneNumber"
+                            placeholder="+1 (555) 000-0000" />
+                    </div>
+                </div>
+
+                <div class="form-group half-width">
+                    <label>GST Number</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">#</span>
+                        <input type="text" name="gstNumber" [(ngModel)]="client.gstNumber"
+                            placeholder="Enter GST number" maxlength="15" />
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group half-width">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" name="emailId" [(ngModel)]="client.emailId"
+                            placeholder="john@example.com" />
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="form-group full-width">
+                    <label>Physical Address</label>
+                    <div class="input-wrapper textarea-wrapper">
+                        <span class="input-icon">📍</span>
+                        <textarea name="address" [(ngModel)]="client.address"
+                            placeholder="Enter full street address..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" [disabled]="clientForm.invalid || loading">
+                    <span class="btn-text">{{ loading ? 'Saving...' : 'Create Client' }}</span>
+                    <span class="btn-icon" *ngIf="!loading">✨</span>
+                </button>
+                <button type="button" class="btn-outline" (click)="viewAllClients()">
+                    View All Clients
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

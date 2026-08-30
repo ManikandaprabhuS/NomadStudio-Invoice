@@ -20,7 +20,11 @@ export class Invoice {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       },
       body: JSON.stringify(updatedData)
-    }).then(res => res.json());
+    }).then(async res => {
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.message || 'Failed to update invoice');
+      return body;
+    });
   }
 
   deleteInvoice(id: string) {
@@ -31,7 +35,11 @@ export class Invoice {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
-    }).then(res => res.json());
+    }).then(async res => {
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.message || 'Failed to delete invoice');
+      return body;
+    });
   }
 
    private getToken(): string | null {
@@ -41,7 +49,7 @@ export class Invoice {
     return null;
   }
 
- createInvoice(invoice: any) {
+  createInvoice(invoice: any) {
     const token = this.getToken();
 
     return fetch(this.apiUrl, {
@@ -51,7 +59,11 @@ export class Invoice {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       },
       body: JSON.stringify(invoice)
-    }).then(res => res.json());
+    }).then(async res => {
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.message || 'Failed to create invoice');
+      return body;
+    });
   }
 
   getInvoices() {

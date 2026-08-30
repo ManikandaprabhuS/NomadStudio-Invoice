@@ -21,6 +21,7 @@
                 <tr>
                     <th>Client Content</th>
                     <th>Phone</th>
+                    <th>GST Number</th>
                     <th>Email</th>
                     <th>Address</th>
                     <th class="text-right">Actions</th>
@@ -43,6 +44,12 @@
                             }}</span>
                         <input class="edit-input" *ngIf="editingClient?._id === client._id"
                             [(ngModel)]="editingClient.phoneNumber" placeholder="Phone Number" />
+                    </td>
+
+                    <td data-label="GST Number">
+                        <span *ngIf="editingClient?._id !== client._id">{{ client.gstNumber || '-' }}</span>
+                        <input class="edit-input" *ngIf="editingClient?._id === client._id"
+                            [(ngModel)]="editingClient.gstNumber" placeholder="GST Number" maxlength="15" />
                     </td>
 
                     <!-- Email -->

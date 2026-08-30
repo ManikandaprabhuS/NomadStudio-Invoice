@@ -13,11 +13,17 @@ export class InvoiceTemplateComponent implements OnChanges {
 
     displayServices: any[] = [];
     amountInWords: string = '';
+    displaySubTotal = 0;
+    displayCgst = 0;
+    displaySgst = 0;
+    displayRoundOff = 0;
+    displayTotal = 0;
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['invoice'] && this.invoice) {
             this.prepareDisplayData();
-            this.amountInWords = this.numberToWords(this.invoice.totalAmount || 0);
+            this.prepareAmounts();
+            this.amountInWords = this.numberToWords(this.displayTotal);
         }
     }
 
@@ -34,6 +40,47 @@ export class InvoiceTemplateComponent implements OnChanges {
                 this.displayServices.push({ isEmpty: true });
             }
         }
+    }
+
+    prepareAmounts() {
+        const serviceSubTotal = (this.invoice.services || []).reduce(
+            (sum: number, service: any) => {
+                const storedAmount = Number(service.amountCharged);
+                const calculatedAmount = Number(service.quantity || 0) * Number(service.pricePerUnit || 0);
+                return sum + (Number.isFinite(storedAmount) ? storedAmount : calculatedAmount);
+            },
+            0
+        );
+        this.displaySubTotal = this.hasNumber(this.invoice.subTotal)
+            ? Number(this.invoice.subTotal)
+            : this.roundCurrency(serviceSubTotal);
+        this.displayCgst = this.hasNumber(this.invoice.cgstAmount)
+            ? Number(this.invoice.cgstAmount)
+            : this.roundCurrency(this.displaySubTotal * 0.09);
+        this.displaySgst = this.hasNumber(this.invoice.sgstAmount)
+            ? Number(this.invoice.sgstAmount)
+            : this.roundCurrency(this.displaySubTotal * 0.09);
+        const totalBeforeRoundOff = this.roundCurrency(
+            this.displaySubTotal + this.displayCgst + this.displaySgst
+        );
+        this.displayTotal = this.roundFinalAmount(totalBeforeRoundOff);
+        this.displayRoundOff = this.hasNumber(this.invoice.roundOff)
+            ? Number(this.invoice.roundOff)
+            : this.roundCurrency(this.displayTotal - totalBeforeRoundOff);
+    }
+
+    private hasNumber(value: unknown): boolean {
+        return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
+    }
+
+    private roundCurrency(value: number): number {
+        return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+    }
+
+    private roundFinalAmount(value: number): number {
+        const wholeAmount = Math.floor(value);
+        const decimalAmount = this.roundCurrency(value - wholeAmount);
+        return decimalAmount <= 0.5 ? wholeAmount : wholeAmount + 1;
     }
 
     numberToWords(amount: number): string {

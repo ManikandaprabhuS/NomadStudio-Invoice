@@ -1,5 +1,25 @@
 const User = require('../models/User');
 
+exports.findUserByBusinessDetails = async (req, res) => {
+  try {
+    const phoneNumber = req.query.phoneNumber?.trim();
+    const gstNumber = req.query.gstNumber?.trim().toUpperCase();
+    const matches = [];
+    if (phoneNumber) matches.push({ phoneNumber });
+    if (gstNumber) matches.push({ gstNumber });
+    if (!matches.length) {
+      return res.status(400).json({ message: 'Phone number or GST number is required' });
+    }
+
+    const user = await User.findOne({ $or: matches });
+    if (!user) return res.status(404).json({ message: 'No matching client found' });
+    return res.json(user);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // CREATE
 exports.createUser = async (req, res) => {
   try {   

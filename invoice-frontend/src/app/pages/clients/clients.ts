@@ -65,7 +65,8 @@ export class Clients {
     } else {
       this.filteredClients = this.clients.filter(client =>
         (client.userName && client.userName.toLowerCase().includes(term)) ||
-        (client.phoneNumber && client.phoneNumber.toString().includes(term))
+        (client.phoneNumber && client.phoneNumber.toString().includes(term)) ||
+        (client.gstNumber && client.gstNumber.toLowerCase().includes(term))
       );
 
     }

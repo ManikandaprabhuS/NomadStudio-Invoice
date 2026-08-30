@@ -5,6 +5,7 @@ import { Invoice } from '../service/invoice';
 import { CommonModule } from '@angular/common';
 import { AlertService } from '../service/alert.service';
 import { ServiceCatalog, ServiceType } from '../service/service-catalog';
+import { Client } from '../service/client';
 
 @Component({
   selector: 'app-create-invoice',
@@ -16,10 +17,15 @@ import { ServiceCatalog, ServiceType } from '../service/service-catalog';
 export class CreateInvoice implements OnInit {
 
   serviceTypes: ServiceType[] = [];
+  businessClients: any[] = [];
+  clientsLoaded = false;
+  clientLookupMessage = '';
 
   invoice = {
     userName: '',
     phoneNumber: '',
+    gstNumber: '',
+    emailId: '',
     services: [
       {
         serviceType: '',
@@ -29,6 +35,10 @@ export class CreateInvoice implements OnInit {
         notes: ''
       }
     ],
+    subTotal: 0,
+    cgstAmount: 0,
+    sgstAmount: 0,
+    roundOff: 0,
     totalAmount: 0,
     receivedAmount: 0,
     balanceAmount: 0,
@@ -36,7 +46,9 @@ export class CreateInvoice implements OnInit {
     ownerDetails: {
       companyName: 'Nomad Studio Pvt Ltd',
       ownerName: 'Suriya',
-      phoneNumber: '+91 1234567890',
+      phoneNumber: '8015534983, 7598204583',
+      emailId: 'nomadstudioodc@gmail.com',
+      gstNumber: '33KXVPS2471D1ZX',
       address: 'Dharapuram Road, Oddanchatram-624619, Tamil Nadu',
     }
   };
@@ -45,13 +57,25 @@ export class CreateInvoice implements OnInit {
     private invoiceService: Invoice,
     private router: Router,
     private alertService: AlertService,
-    private serviceCatalog: ServiceCatalog
+    private serviceCatalog: ServiceCatalog,
+    private clientService: Client
   ) { }
 
   ngOnInit(): void {
     this.serviceCatalog.getServices().subscribe({
       next: services => this.serviceTypes = services,
       error: () => this.alertService.error('Failed to load services')
+    });
+    this.clientService.getAllClients().subscribe({
+      next: clients => {
+        this.businessClients = clients;
+        this.clientsLoaded = true;
+        this.scheduleClientLookup();
+      },
+      error: () => {
+        this.clientsLoaded = true;
+        this.businessClients = [];
+      }
     });
   }
 
@@ -73,19 +97,63 @@ export class CreateInvoice implements OnInit {
   recalculate() {
     // service-wise calculation
     this.invoice.services.forEach(s => {
-      s.amountCharged =
-        (Number(s.quantity) || 0) * (Number(s.pricePerUnit) || 0);
+      s.amountCharged = this.roundCurrency(
+        (Number(s.quantity) || 0) * (Number(s.pricePerUnit) || 0)
+      );
     });
 
-    // total
-    this.invoice.totalAmount = this.invoice.services.reduce(
+    this.invoice.subTotal = this.roundCurrency(this.invoice.services.reduce(
       (sum, s) => sum + s.amountCharged,
       0
+    ));
+    this.invoice.cgstAmount = this.roundCurrency(this.invoice.subTotal * 0.09);
+    this.invoice.sgstAmount = this.roundCurrency(this.invoice.subTotal * 0.09);
+    const totalBeforeRoundOff = this.roundCurrency(
+      this.invoice.subTotal + this.invoice.cgstAmount + this.invoice.sgstAmount
+    );
+    this.invoice.totalAmount = this.roundFinalAmount(totalBeforeRoundOff);
+    this.invoice.roundOff = this.roundCurrency(this.invoice.totalAmount - totalBeforeRoundOff);
+
+    this.invoice.balanceAmount = this.roundCurrency(
+      this.invoice.totalAmount - (Number(this.invoice.receivedAmount) || 0)
+    );
+  }
+
+  scheduleClientLookup() {
+    this.clientLookupMessage = '';
+    const phoneNumber = this.normalizePhone(this.invoice.phoneNumber);
+    const gstNumber = this.invoice.gstNumber.trim().toUpperCase();
+    if (phoneNumber.length < 10 && gstNumber.length < 15) return;
+
+    const client = this.businessClients.find(item =>
+      (phoneNumber.length >= 10 && this.normalizePhone(item.phoneNumber) === phoneNumber) ||
+      (gstNumber.length === 15 && String(item.gstNumber || '').trim().toUpperCase() === gstNumber)
     );
 
-    // balance
-    this.invoice.balanceAmount =
-      this.invoice.totalAmount - (Number(this.invoice.receivedAmount) || 0);
+    if (client) {
+      this.invoice.userName = client.userName || '';
+      this.invoice.phoneNumber = client.phoneNumber || this.invoice.phoneNumber;
+      this.invoice.gstNumber = client.gstNumber || this.invoice.gstNumber;
+      this.invoice.emailId = client.emailId || '';
+      this.clientLookupMessage = 'Existing client details loaded.';
+    } else if (this.clientsLoaded) {
+      this.clientLookupMessage = 'No matching client found. This client will be saved when the invoice is created.';
+    }
+  }
+
+  private normalizePhone(value: unknown): string {
+    const digits = String(value || '').replace(/\D/g, '');
+    return digits.length > 10 ? digits.slice(-10) : digits;
+  }
+
+  private roundCurrency(value: number): number {
+    return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+  }
+
+  private roundFinalAmount(value: number): number {
+    const wholeAmount = Math.floor(value);
+    const decimalAmount = this.roundCurrency(value - wholeAmount);
+    return decimalAmount <= 0.5 ? wholeAmount : wholeAmount + 1;
   }
 
   saveInvoice() {
@@ -98,6 +166,16 @@ export class CreateInvoice implements OnInit {
     // Validate Phone Number
     if (!this.invoice.phoneNumber || this.invoice.phoneNumber.trim() === '') {
       this.alertService.error('Please enter phone number');
+      return;
+    }
+
+    if (!this.invoice.gstNumber || this.invoice.gstNumber.trim() === '') {
+      this.alertService.error('Please enter GST number');
+      return;
+    }
+
+    if (!this.invoice.emailId || this.invoice.emailId.trim() === '') {
+      this.alertService.error('Please enter client email ID');
       return;
     }
 
@@ -132,6 +210,9 @@ export class CreateInvoice implements OnInit {
       this.alertService.error('Please enter a valid received amount');
       return;
     }
+    this.invoice.gstNumber = this.invoice.gstNumber.trim().toUpperCase();
+    this.invoice.emailId = this.invoice.emailId.trim();
+    this.recalculate();
     this.invoiceService.createInvoice(this.invoice)
       .then(() => {
         this.alertService.success('Invoice saved successfully');
@@ -144,6 +225,8 @@ export class CreateInvoice implements OnInit {
   clearInvoice() {
     this.invoice.userName = '';
     this.invoice.phoneNumber = '';
+    this.invoice.gstNumber = '';
+    this.invoice.emailId = '';
     this.invoice.services = [
       {
         serviceType: '',
@@ -153,10 +236,15 @@ export class CreateInvoice implements OnInit {
         notes: ''
       }
     ];
+    this.invoice.subTotal = 0;
+    this.invoice.cgstAmount = 0;
+    this.invoice.sgstAmount = 0;
+    this.invoice.roundOff = 0;
     this.invoice.totalAmount = 0;
     this.invoice.receivedAmount = 0;
     this.invoice.balanceAmount = 0;
     this.invoice.generalNotes = '';
+    this.clientLookupMessage = '';
   }
 
   goToList() {

@@ -27,7 +27,8 @@
             <h4 class="company-name">{{ invoice.ownerDetails.companyName }}</h4>
             <p class="address">{{ invoice.ownerDetails.address }}</p>
             <p class="contact">📞 {{ invoice.ownerDetails.phoneNumber }}</p>
-            <p class="email">nomadstudioodc@gmail.com</p>
+            <p class="email">{{ invoice.ownerDetails.emailId }}</p>
+            <p class="gst-number">GST No: {{ invoice.ownerDetails.gstNumber }}</p>
           </div>
         </div>
       </div>
@@ -46,9 +47,23 @@
             <div class="input-field">
               <label>Phone Number <span class="required">*</span></label>
               <input type="text" [(ngModel)]="invoice.phoneNumber" placeholder="Enter phone number" required
-                #phoneNumber />
+                (ngModelChange)="scheduleClientLookup()" #phoneNumber />
             </div>
           </div>
+          <div class="field-row">
+            <div class="input-field">
+              <label>Email ID <span class="required">*</span></label>
+              <input type="email" [(ngModel)]="invoice.emailId" placeholder="Enter client email address" required />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="input-field">
+              <label>GST Number <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="invoice.gstNumber" placeholder="Enter GST number" required
+                (ngModelChange)="scheduleClientLookup()" maxlength="15" />
+            </div>
+          </div>
+          <p class="client-lookup-message" *ngIf="clientLookupMessage">{{ clientLookupMessage }}</p>
         </div>
       </div>
     </div>
@@ -114,7 +129,23 @@
       <div class="summary-group">
         <div class="summary-row total">
           <span>Subtotal</span>
-          <span class="value">₹ {{ invoice.totalAmount | number:'1.0-0' }}</span>
+          <span class="value">₹ {{ invoice.subTotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>CGST (9%)</span>
+          <span class="value">₹ {{ invoice.cgstAmount | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>SGST (9%)</span>
+          <span class="value">₹ {{ invoice.sgstAmount | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Round Off</span>
+          <span class="value">₹ {{ invoice.roundOff | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Final Total</span>
+          <span class="value">₹ {{ invoice.totalAmount | number:'1.2-2' }}</span>
         </div>
         <div class="summary-row received">
           <label>Amount Received (₹)</label>

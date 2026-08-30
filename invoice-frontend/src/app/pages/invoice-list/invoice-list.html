@@ -168,6 +168,24 @@
         <button class="btn-outline" (click)="closePreview()">Close</button>
       </div>
     </div>
+    <div class="missing-client-details"
+      *ngIf="!selectedInvoice?.gstNumber || !selectedInvoice?.emailId">
+      <div>
+        <strong>Complete Client Details</strong>
+        <p>This older invoice does not have GST or email information saved.</p>
+      </div>
+      <label>
+        <span>GST Number</span>
+        <input type="text" [(ngModel)]="selectedInvoice.gstNumber" maxlength="15"
+          placeholder="Enter client GST number" />
+      </label>
+      <label>
+        <span>Email ID</span>
+        <input type="email" [(ngModel)]="selectedInvoice.emailId"
+          placeholder="Enter client email address" />
+      </label>
+      <button class="btn-primary" type="button" (click)="savePreviewClientDetails()">Save Client Details</button>
+    </div>
     <div id="invoice-pdf" class="invoice-pdf">
       <app-invoice-template [invoice]="selectedInvoice"></app-invoice-template>
     </div>
